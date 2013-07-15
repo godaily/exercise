@@ -2,9 +2,9 @@ package actions
 
 import (
 	//. "github.com/lunny/xorm"
-	//. "github.com/lunny/xweb"
+	. "github.com/lunny/xweb"
 	"time"
-	. "xweb"
+	//. "xweb"
 )
 
 type ExerciseAction struct {
@@ -39,7 +39,7 @@ func (c *ExerciseAction) Add() error {
 		}
 		return err
 	} else if c.Method() == "POST" {
-		//c.Exercise.CreatorId =
+		c.Exercise.CreatorId = c.BaseAction.GetLoginUserId()
 		c.Exercise.Created = time.Now()
 		_, err := Orm.Insert(&c.Exercise)
 		if err == nil {
