@@ -1,0 +1,56 @@
+{{include "head.html"}}
+{{$basePath := .App.BasePath}}
+<div class="row">
+<div class="span9">
+	<div class="row">
+		<div style="border-bottom: 1px solid"><b>{{.TheQuestion.Title}}</b></div>
+	</div>
+	<div class="row">
+		<div class="span1">
+			<div><i class="icon-thumbs-up"></i> {{.TheQuestion.NumAnswers}}</div>
+			<div><i class="icon-thumbs-down"></i> {{.TheQuestion.NumUps}}</div>
+			<div>头像</div>
+		</div>
+		<div class="span8">
+			<div>{{Html .TheQuestion.Content}}</div>
+			<div>{{FormatDate .TheQuestion.LastUpdated "2006-01-02 03:04:05"}}</div>
+		</div>
+	</div>
+{{range .T.answers}}
+<div class="row">
+	<div class="span1">
+<div>头像</div>
+<div><i class="icon-thumbs-up"></i> 顶</div>
+<div><i class="icon-thumbs-down"></i> 踩</div>
+	</div>
+	<div class="span8">
+		<div class="flow">
+		<div class="span7" style="border-bottom: 1px solid"><a href="">{{.Title}}</a></div>
+		<div class="span1">{{FormatDate .LastUpdated "2006-01-02 03:04:05"}}</div>
+	</div>
+		<div>{{Html .Content}}</div>
+	</div>
+</div>
+{{end}}
+	<div class="row">
+		<div class="span12">
+		<form class="form-horizontal" action="{{$basePath}}question/answer" method="post" style="margin-left:0px">
+			<div class="control-group">
+				<div class="controls">
+			<textarea class="span8" rows="10" name="theAnswer.content"></textarea>
+				</div>
+			</div>
+			<div class="control-group">
+				<div class="controls">
+				<input type="submit" class="btn btn-primary" value="提交"/>
+			</div>
+			</div>
+		</form>
+	</div>
+	</div>
+</div>
+<div class="span3">
+	<a class="btn btn-primary btn-xlarge" href="{{.App.BasePath}}question/ask">我要提问</a>
+</div>
+</div>
+{{include "footer.html"}}

@@ -1,0 +1,48 @@
+{{include "head.html"}}
+<div class="row frame">
+	<div class="span9">
+	{{if .T.has}}
+		<div class="row">
+			<div class="text-left"><span><h2>{{.Exercise.Title}}</h2></span><span>({{FormatDate .Exercise.ShowDate "2006-01-02"}})</span></div>
+			<div class="hero-unit text-left">
+			  {{Html .Exercise.Content}}
+			</div>
+			<div class="row">
+				<div class="span5">
+{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
+				</div>
+				<div class="text-right span4">
+				<a href="{{.App.BasePath}}exercise/sub?id={{.Exercise.Id}}" class="btn btn-large">我要做题</a></div>
+			</div>
+		</div>
+	{{else}}
+		<div class="hero-unit">
+		还没有任何练习呢，点击这里添加新的练习哦。
+		</div>
+	{{end}}
+	</div>
+	<div class="span3 last">
+		<div>
+		<a href="{{.App.BasePath}}exercise/add" class="btn btn-primary btn-block">我要出题</a>
+		</div>
+
+		<div>
+			<table class="table table-bordered">
+			<caption>习主排行榜</caption>
+			<tbody>
+			<tr></tr>
+			</tbody>
+		</table>
+		</div>
+
+		<div>
+			<table class="table table-bordered">
+			<caption>做题排行榜</caption>
+			<tbody>
+			<tr></tr>
+			</tbody>
+		</table>
+		</div>
+	</div>
+</div>
+{{include "footer.html"}}

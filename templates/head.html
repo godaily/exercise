@@ -1,0 +1,41 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Go Daily - go语言每日一练 go语言问答 golang</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="{{StaticUrl "bootstrap/css/bootstrap.min.css"}}" />
+<script src="{{StaticUrl "js/jquery.min.js"}}"></script>
+<style>
+.footer {
+    text-align: center;
+    padding: 30px 0px;
+    margin-top: 70px;
+    border-top: 1px solid rgb(229, 229, 229);
+    background-color: rgb(245, 245, 245);
+}
+.frame {
+    margin-top:30px;
+}
+</style>
+    </head>
+    <body>
+        <div class="container">
+ <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+    <a class="brand" href="#">Go Daily</a>
+    <ul class="nav">
+    <li {{if isCurModule 1}} class="active"{{end}}><a href="/exercise/">每日一练</a></li>
+    <li {{if isCurModule 2}} class="active"{{end}}><a href="/question/">每日问答</a></li>
+    <li {{if isCurModule 3}} class="active"{{end}}><a href="/about">关于</a></li>
+    </ul>
+    <div class="pull-right">
+        <ul class="nav">
+            <li>
+        {{if IsLogedIn}}<a href="#">退出 xlw</a>{{else}}<a href="/login">登录</a>{{end}}
+            </li>
+            <li><a href="/register">注册</a></li>
+        </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+{{include "head.html"}}
+<div class="row frame">
+<div class="span9">
+	<div class="row">
+	
+	<div class="span9">
+    <ul class="span9 nav nav-tabs nav-right">
+    <li class="active">
+    <a href="#">最新问题</a>
+    </li>
+    <li><a href="#">热门问题</a></li>
+    <li><a href="#">未回答问题</a></li>
+    </ul>
+	</div>
+	</div>
+	{{$basePath := .App.BasePath}}
+{{range .T.questions}}
+<div class="row">
+	<div class="span1">
+		<div><i class="icon-thumbs-up"></i> {{.NumAnswers}}</div>
+		<div><i class="icon-thumbs-down"></i> {{.NumUps}}</div>
+	</div>
+	<div class="span7">
+		<div><b><a href="{{$basePath}}question/q?questionId={{.Id}}">{{.Title}}</a></b></div>
+		<div>{{FormatDate .LastUpdated "2006-01-02 03:04:05"}}</div>
+	</div>
+	<div class="span1">头像</div>
+</div>
+{{end}}
+</div>
+<div class="span3 last">
+	<a class="btn btn-primary btn-xlarge" href="{{.App.BasePath}}question/ask">我要提问</a>
+</div>
+</div>
+{{include "footer.html"}}

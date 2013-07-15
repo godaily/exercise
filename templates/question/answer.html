@@ -1,0 +1,20 @@
+{{include "head.html"}}
+<div class="row">
+<div class="span9">
+	<form method="post">
+	<input type="text" name="question.title"/>
+	<textarea class="ckeditor" name="question.content" id="content"></textarea>
+	<script>
+			CKEDITOR.replace( 'content' );
+		</script>
+	<p>
+	<input type="submit" value="发布"/>
+</p>
+</form>
+</div>
+<div class="span3 last">
+	<a class="btn btn-primary btn-xlarge" href="{{.App.BasePath}}ask">我要提问</a>
+</div>
+</div>
+<script src="{{StaticUrl "ckeditor/ckeditor.js"}}"></script>
+{{include "footer.html"}}
