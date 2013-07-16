@@ -1,12 +1,9 @@
 package actions
 
 import (
-	//. "github.com/lunny/xorm"
-	. "github.com/lunny/xweb"
-	//"fmt"
 	. "github.com/lunny/play-sdk"
+	. "github.com/lunny/xweb"
 	"time"
-	//. "xweb"
 )
 
 type ExerciseAction struct {
