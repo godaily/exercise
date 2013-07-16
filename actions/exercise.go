@@ -39,7 +39,7 @@ func (c *ExerciseAction) Add() error {
 		}
 		return err
 	} else if c.Method() == "POST" {
-		//c.Exercise.CreatorId =
+		c.Exercise.CreatorId = c.BaseAction.GetLoginUserId()
 		c.Exercise.Created = time.Now()
 		_, err := Orm.Insert(&c.Exercise)
 		if err == nil {
