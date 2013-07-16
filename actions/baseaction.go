@@ -1,8 +1,8 @@
 package actions
 
 import (
-	//. "github.com/lunny/xweb"
-	. "xweb"
+	. "github.com/lunny/xweb"
+	//. "xweb"
 )
 
 type BaseAction struct {
