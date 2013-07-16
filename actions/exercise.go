@@ -2,17 +2,20 @@ package actions
 
 import (
 	//. "github.com/lunny/xorm"
-	. "github.com/lunny/xweb"
+	//. "github.com/lunny/xweb"
+	//"fmt"
+	. "github.com/lunny/play-sdk"
 	"time"
-	//. "xweb"
+	. "xweb"
 )
 
 type ExerciseAction struct {
 	BaseAction
 
-	root Mapper `xweb:"/"`
-	add  Mapper
-	sub  Mapper
+	root    Mapper `xweb:"/"`
+	add     Mapper
+	sub     Mapper
+	compile Mapper
 
 	Exercise Exercise
 	Answer   ExerciseAnswer
@@ -48,6 +51,19 @@ func (c *ExerciseAction) Add() error {
 		return err
 	}
 	return NotSupported()
+}
+
+func (c *ExerciseAction) Compile() {
+	res, err := Compile(c.Answer.Content)
+	if err == nil {
+		if res.Errors == "" {
+			c.ServeJson(res.Events)
+		} else {
+			c.ServeJson(map[string]interface{}{"errors": res.Errors})
+		}
+	} else {
+		c.ServeJson(map[string]interface{}{"errors": err.Error()})
+	}
 }
 
 func (c *ExerciseAction) Sub() error {

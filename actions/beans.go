@@ -2,7 +2,9 @@ package actions
 
 import (
 	. "code.google.com/p/go.crypto/scrypt"
+	"crypto/md5"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -13,24 +15,25 @@ const (
 )
 
 type Exercise struct {
-	Id        int64
-	CreatorId int64
-	Created   time.Time
-	Title     string `xorm:"varchar(500)"`
-	Content   string `xorm:"text"`
-	ShowDate  time.Time
+	Id         int64
+	CreatorId  int64
+	Created    time.Time
+	Title      string `xorm:"varchar(500)"`
+	Content    string `xorm:"text"`
+	ShowDate   time.Time
+	NumAnswers int
 }
 
 type ExerciseAnswer struct {
-	Id       int64
-	AnswerId int64
-	Created  time.Time
-	Content  string `xorm:"text"`
+	Id         int64
+	ExerciseId int64
+	Created    time.Time
+	Content    string `xorm:"text"`
 }
 
 type User struct {
 	Id           int64
-	LoginName    string
+	LoginName    string `xorm:"unique"`
 	UserName     string
 	Email        string
 	Password     string `xorm:"varchar(128)"`
@@ -44,13 +47,23 @@ type User struct {
 }
 
 const (
-	USER_ID_TAG = "UserId"
+	USER_ID_TAG     = "UserId"
+	USER_NAME_TAG   = "UserName"
+	USER_AVATAR_TAG = "UserAvatar"
 )
 
 func (u *User) EncodePasswd() error {
 	newPasswd, err := Key([]byte(u.Password), []byte("!#@FDEWREWR&*("), 16384, 8, 1, 64)
 	u.Password = fmt.Sprintf("%x", newPasswd)
 	return err
+}
+
+func (u *User) BuildAvatar() {
+	m := md5.New()
+	m.Write([]byte(strings.ToLower(strings.Trim(u.Email, " "))))
+	dg := fmt.Sprintf("%x", m.Sum(nil))
+	fmt.Println(dg)
+	u.Avatar = fmt.Sprintf("http://www.gravatar.com/avatar/%v", dg)
 }
 
 type Question struct {

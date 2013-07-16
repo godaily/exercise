@@ -31,5 +31,9 @@ func main() {
 	AddAction(&MainAction{})
 	AddRouter("/exercise/", &ExerciseAction{})
 	AddRouter("/question/", &QuestionAction{})
+	app := MainServer().RootApp
+	loginFilter := NewLoginFilter(app, USER_ID_TAG, "/login")
+	loginFilter.AddAskLoginUrls("/exercise/add", "/exercise/sub")
+	app.AddFilter(loginFilter)
 	Run("0.0.0.0:" + cfgs["port"])
 }

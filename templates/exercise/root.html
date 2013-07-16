@@ -1,28 +1,94 @@
 {{include "head.html"}}
-<div class="container">
-<div class="row frame">
+<div class="container frame">
+<div class="row">
 	<div class="span9">
 	{{if .T.has}}
+		<div class="container">
+			<div class="row">
+			<div class="span6">
+				<span><h2>{{.Exercise.Title}}</h2></span><span>({{FormatDate .Exercise.ShowDate "2006-01-02"}})</span>
+					<span>xxx 发布于 
+	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
+					</span>
+			</div>
+			<div class="span3">
+			    <ul class="pager">
+			    <li><a href="#">&larr; 上一题</a></li>
+			    <li><a href="#">下一题 &rarr;</a></li>
+			    </ul>
+			</div>
+		</div>
 		<div class="row">
-			<div class="text-left"><span><h2>{{.Exercise.Title}}</h2></span><span>({{FormatDate .Exercise.ShowDate "2006-01-02"}})</span></div>
+			<div class="span9">
 			<div class="hero-unit text-left">
 			  {{Html .Exercise.Content}}
 			</div>
+		</div>
+		</div>
 			<div class="row">
+				{{if IsLogedIn}}
 				{{range .T.answers}}
 				<div>
-
+				</div>
+				{{end}}
+				{{else}}
+				<div class="span9">
+				xxx人已完成此题目，提交您的答案后将可以查看其他人的答案。
 				</div>
 				{{end}}
 			</div>
-			<div class="row">
-				<div class="span5">
-{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
-				</div>
-				<div class="text-right span4">
-				<a href="{{.App.BasePath}}exercise/sub?id={{.Exercise.Id}}" class="btn btn-large">我要做题</a></div>
-			</div>
+			
+			<div class="container">
+<form method="post" action="{{.App.BasePath}}exercise/sub?id={{.Exercise.Id}}">
+	<textarea name="answer.content" id="code"></textarea>
+	<script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      	lineNumbers:true,
+        theme: "elegant",
+        matchBrackets: true,
+        indentUnit: 8,
+        tabSize: 8,
+        indentWithTabs: true,
+        mode: "text/x-go"
+      });
+    </script>
+	<p class="frame">
+		<a id="btnCompile" href="#" class="btn btn-large">测试结果</a>&nbsp; &nbsp; 
+		<script>
+		$(function(){
+			$('#btnCompile').click(function(){
+				$('#btnCompile').click(function(){})
+				$('#btnCompile').addClass('disabled')
+				$('#btnSubmit').addClass('disabled')
+				$('#message').text("compiling ...")
+
+				$.post("{{.App.BasePath}}exercise/compile", 
+					{"answer.content":editor.getValue()}, function(data, statusText, jqXHR){
+						if (statusText == "success") {
+							if ("errors" in data) {
+								$('#message').text(data['errors']);
+							} else {
+								text = ""
+								for (var a in data) {
+									text += data[a]["Message"]+"\n"
+								}
+								$('#message').text(text);
+							}
+						} else {
+							$('#message').text("request error "+statusText)
+						}
+						$('#btnCompile').removeClass('disabled')
+						$('#btnSubmit').removeClass('disabled')
+					}
+				)
+			});
+		});
+		</script>
+	<input id="btnSubmit" type="submit" class="btn btn-primary btn-large" value="提交答案"/>&nbsp; &nbsp; <span id="message" style="color:red"></span>
+	</p>
+</form>
 		</div>
+	</div>
 	{{else}}
 		<div class="hero-unit">
 			<h2>欢迎来到每日一练</h2>
@@ -41,9 +107,9 @@
 			<thead><tr><td><div class="text-center">出题排行榜</div></td></tr></thead>
 			<tbody>
 				<tr><td>
-					<ul style="min-height:100px;">
+					<ul class="unstyled" style="min-height:100px;">
 				{{range .T.qusers}}
-			<li>{{.Name}}</li>
+			<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} - {{.NumQuestions}}</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -54,9 +120,9 @@
 			<thead><tr><td><div class="text-center">做题排行榜</div></td></tr></thead>
 			<tbody>
 				<tr><td>
-					<ul style="min-height:100px;">
+					<ul class="unstyled" style="min-height:100px;">
 				{{range .T.eusers}}
-				<li>{{.Name}}</li>
+				<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} - {{.NumExercises}}</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -64,4 +130,5 @@
 	</div>
 </div>
 </div>
+    
 {{include "footer.html"}}
