@@ -2,9 +2,9 @@ package actions
 
 import (
 	//. "github.com/lunny/xorm"
-	//. "github.com/lunny/xweb"
 	"time"
-	. "xweb"
+
+	. "github.com/lunny/xweb"
 )
 
 type ExerciseAction struct {

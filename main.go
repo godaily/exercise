@@ -3,11 +3,11 @@ package main
 import (
 	. "./actions"
 	"fmt"
+	"io/ioutil"
+
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/lunny/xorm"
-	//. "github.com/lunny/xweb"
-	"io/ioutil"
-	. "xweb"
+	. "github.com/lunny/xweb"
 )
 
 func main() {
