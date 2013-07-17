@@ -17,6 +17,7 @@ const (
 type Exercise struct {
 	Id         int64
 	CreatorId  int64
+	Creator    User `xorm:"creator_id int(11)"`
 	Created    time.Time
 	Title      string `xorm:"varchar(500)"`
 	Content    string `xorm:"text"`
@@ -27,6 +28,7 @@ type Exercise struct {
 type ExerciseAnswer struct {
 	Id         int64
 	ExerciseId int64
+	Creator    User `xorm:"creator_id int(11)"`
 	Created    time.Time
 	Content    string `xorm:"text"`
 }

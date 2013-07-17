@@ -42,7 +42,7 @@
     <div class="pull-right">
         <ul class="nav">
             <li>
-        {{if IsLogedIn}}<a href="#">退出 {{GetLoginUserName}}<img src="{{GetLoginUserAvatar}}?s=16"/></a>{{else}}<a href="/login">登录</a>{{end}}
+        {{if IsLogedIn}}<a href="{{.App.BasePath}}logout"><img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}} 退出</a>{{else}}<a href="/login">登录</a>{{end}}
             </li>
             <li><a href="/register">注册</a></li>
         </ul>

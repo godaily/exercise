@@ -20,8 +20,9 @@
 			<tbody>
 				<tr><td>
 					<ul style="min-height:100px;">
+						{{$basePath := .App.BasePath}}
 				{{range .T.exercises}}
-					</li>{{.Title}}</li>
+					<li><a href="{{$basePath}}exercise/?id={{.Id}}">{{.Title}}</a></li>
 				{{end}}
 			</ul></td></tr>
 			</tbody>

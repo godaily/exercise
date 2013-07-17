@@ -6,8 +6,8 @@
 		<div class="container">
 			<div class="row">
 			<div class="span6">
-				<span><h2>{{.Exercise.Title}}</h2></span><span>({{FormatDate .Exercise.ShowDate "2006-01-02"}})</span>
-					<span>xxx 发布于 
+				<span><h2>{{.Exercise.Title}}</h2></span><span><!--({{FormatDate .Exercise.ShowDate "2006-01-02"}})--></span>
+					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.LoginName}} 发布于 
 	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
 					</span>
 			</div>
@@ -26,16 +26,16 @@
 		</div>
 		</div>
 			<div class="row">
-				{{if IsLogedIn}}
-				{{range .T.answers}}
-				<div>
-				</div>
-				{{end}}
-				{{else}}
+				
 				<div class="span9">
-				xxx人已完成此题目，提交您的答案后将可以查看其他人的答案。
-				</div>
+					{{if IsLogedIn}}<a href="#">{{end}}
+				{{range .T.answers}}
+					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
 				{{end}}
+				共 {{.Exercise.NumAnswers}} 人完成此题目
+				{{if IsLogedIn}}{{else}}，提交您的答案后可查看其他答案{{end}}。
+			{{if IsLogedIn}}</a>{{end}}
+				</div>
 			</div>
 			
 			<div class="container">
@@ -51,6 +51,9 @@
         indentWithTabs: true,
         mode: "text/x-go"
       });
+      {{if .T.hasSubmited}}
+      editor.setValue('{{.T.curAnswer.Content}}')
+      {{end}}
     </script>
 	<p class="frame">
 		<a id="btnCompile" href="#" class="btn btn-large">测试结果</a>&nbsp; &nbsp; 
@@ -84,6 +87,9 @@
 			});
 		});
 		</script>
+		<input type="hidden" name="answer.exerciseId" value="{{.Id}}"/>
+		{{if .T.hasSubmited}}<input type="hidden" name="answer.id" value="{{.T.curAnswer.Id}}"/>
+		{{end}}
 	<input id="btnSubmit" type="submit" class="btn btn-primary btn-large" value="提交答案"/>&nbsp; &nbsp; <span id="message" style="color:red"></span>
 	</p>
 </form>
@@ -109,7 +115,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range .T.qusers}}
-			<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} - {{.NumQuestions}}</li>
+			<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 出题 {{.NumQuestions}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -122,7 +128,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range .T.eusers}}
-				<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} - {{.NumExercises}}</li>
+				<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 做题 {{.NumExercises}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>

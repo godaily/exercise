@@ -1,8 +1,9 @@
 package actions
 
 import (
-	. "github.com/lunny/xorm"
+	//. "github.com/lunny/xorm"
 	. "github.com/lunny/xweb"
+	. "xorm"
 )
 
 var (
@@ -16,6 +17,7 @@ type MainAction struct {
 	about    Mapper
 	register Mapper
 	login    Mapper
+	logout   Mapper
 
 	User       User
 	Message    string
@@ -57,6 +59,13 @@ func (c *MainAction) Login() error {
 		return err
 	}
 	return NotSupported()
+}
+
+func (c *MainAction) Logout() error {
+	c.DelSession(USER_ID_TAG)
+	c.DelSession(USER_NAME_TAG)
+	c.DelSession(USER_AVATAR_TAG)
+	return c.Go("root")
 }
 
 func (c *MainAction) Register() error {
