@@ -151,6 +151,8 @@ func (c *ExerciseAction) Root() error {
 			}
 		}
 		return c.Render("exercise/root.html", &T{
+			"IsExer":      true,
+			"AppVer":      AppVer,
 			"has":         has,
 			"answers":     &answers,
 			"qusers":      &qusers,

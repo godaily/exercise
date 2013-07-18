@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "./actions"
+	"./actions"
 	"fmt"
 	"io/ioutil"
 
@@ -9,6 +9,13 @@ import (
 	. "github.com/lunny/xorm"
 	. "github.com/lunny/xweb"
 )
+
+const APP_VER = "0.0.1 Beta"
+
+func init() {
+	// Setting application version.
+	actions.AppVer = "v" + APP_VER
+}
 
 func main() {
 	var err error
@@ -20,19 +27,19 @@ func main() {
 
 	cfgs := SimpleParse(string(data))
 
-	Orm, err = NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
+	actions.Orm, err = NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		cfgs["dbuser"], cfgs["dbpasswd"], cfgs["dbhost"], cfgs["dbname"]))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	Orm.ShowSQL = true
+	actions.Orm.ShowSQL = true
 
-	AddAction(&MainAction{})
-	AddRouter("/exercise/", &ExerciseAction{})
-	AddRouter("/question/", &QuestionAction{})
+	AddAction(&actions.HomeAction{})
+	AddRouter("/exercise", &actions.ExerciseAction{})
+	AddRouter("/question", &actions.QuestionAction{})
 	app := MainServer().RootApp
-	loginFilter := NewLoginFilter(app, USER_ID_TAG, "/login")
+	loginFilter := NewLoginFilter(app, actions.USER_ID_TAG, "/login")
 	loginFilter.AddAskLoginUrls("/exercise/add", "/exercise/sub")
 	app.AddFilter(loginFilter)
 	Run("0.0.0.0:" + cfgs["port"])

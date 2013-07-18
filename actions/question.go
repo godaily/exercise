@@ -3,16 +3,16 @@ package actions
 import (
 	"time"
 
-	. "github.com/lunny/xweb"
+	"github.com/lunny/xweb"
 )
 
 type QuestionAction struct {
 	BaseAction
 
-	root     Mapper `xweb:"/"`
-	ask      Mapper
-	answer   Mapper
-	question Mapper `xweb:"/q"`
+	root     xweb.Mapper `xweb:"/"`
+	ask      xweb.Mapper
+	answer   xweb.Mapper
+	question xweb.Mapper `xweb:"/q"`
 
 	TheQuestion Question
 	TheAnswer   Answer
@@ -33,7 +33,7 @@ func (c *QuestionAction) Root() error {
 	questions := make([]Question, 0)
 	err := Orm.Find(&questions)
 	if err == nil {
-		return c.Render("question/root.html", &T{
+		return c.Render("question/root.html", &xweb.T{
 			"questions": &questions,
 		})
 	}
@@ -49,7 +49,7 @@ func (c *QuestionAction) Question() error {
 
 	err = Orm.Find(&answers, &Answer{QuestionId: c.QuestionId})
 	if err == nil {
-		return c.Render("question/question.html", &T{
+		return c.Render("question/question.html", &xweb.T{
 			"answers": &answers,
 		})
 	}
@@ -67,7 +67,7 @@ func (c *QuestionAction) Ask() error {
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
 
 func (c *QuestionAction) Answer() error {
@@ -80,5 +80,5 @@ func (c *QuestionAction) Answer() error {
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
