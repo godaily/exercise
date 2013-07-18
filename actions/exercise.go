@@ -1,9 +1,10 @@
 package actions
 
 import (
+	"time"
+
 	. "github.com/lunny/play-sdk"
 	. "github.com/lunny/xweb"
-	"time"
 )
 
 type ExerciseAction struct {
@@ -120,7 +121,7 @@ func (c *ExerciseAction) Sub() error {
 }
 
 func (c *ExerciseAction) Root() error {
-	var preId, lastId int64
+	//var preId, lastId int64
 	has, err := Orm.Cascade(false).OrderBy("created desc").Get(&c.Exercise)
 	if err == nil {
 		var answers []ExerciseAnswer

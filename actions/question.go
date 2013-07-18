@@ -1,8 +1,9 @@
 package actions
 
 import (
-	. "github.com/lunny/xweb"
 	"time"
+
+	. "github.com/lunny/xweb"
 )
 
 type QuestionAction struct {

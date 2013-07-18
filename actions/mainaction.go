@@ -1,9 +1,8 @@
 package actions
 
 import (
-	//. "github.com/lunny/xorm"
+	. "github.com/lunny/xorm"
 	. "github.com/lunny/xweb"
-	. "xorm"
 )
 
 var (

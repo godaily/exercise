@@ -17,7 +17,7 @@ func main() {
 	var err error
 	data, err := ioutil.ReadFile("config.ini")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Fail to load configuration:", err)
 		return
 	}
 
@@ -25,7 +25,7 @@ func main() {
 	engine, err = NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		cfgs["dbuser"], cfgs["dbpasswd"], cfgs["dbhost"], cfgs["dbname"]))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Fail to connect to database:", err)
 		return
 	}
 	engine.ShowSQL = true
@@ -36,7 +36,7 @@ func main() {
 		&Message{}, &Topic{}, &QuestionTopic{}, &TopicFollow{})
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Fail to create tables:", err)
 		return
 	}
 

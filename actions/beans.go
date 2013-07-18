@@ -1,11 +1,12 @@
 package actions
 
 import (
-	. "code.google.com/p/go.crypto/scrypt"
 	"crypto/md5"
 	"fmt"
 	"strings"
 	"time"
+
+	. "code.google.com/p/go.crypto/scrypt"
 )
 
 const (
