@@ -1,12 +1,11 @@
 package actions
 
 import (
-	. "github.com/lunny/xweb"
-	//. "xweb"
+	"github.com/lunny/xweb"
 )
 
 type BaseAction struct {
-	Action
+	xweb.Action
 }
 
 func (c *BaseAction) Init() {

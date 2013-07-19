@@ -1,10 +1,10 @@
 package actions
 
 import (
+	"time"
+
 	. "github.com/lunny/play-sdk"
 	. "github.com/lunny/xweb"
-	"time"
-	//. "xweb"
 )
 
 type ExerciseAction struct {
@@ -34,12 +34,7 @@ func GetBadge(i int) string {
 
 func (c *ExerciseAction) Init() {
 	c.BaseAction.Init()
-	c.AddFunc("isCurModule", c.IsCurModule)
 	c.AddFunc("getBadge", GetBadge)
-}
-
-func (c *ExerciseAction) IsCurModule(cur int) bool {
-	return EXERCISE_MODULE == cur
 }
 
 func (c *ExerciseAction) Add() error {
@@ -164,6 +159,7 @@ func (c *ExerciseAction) Root() error {
 			}
 		}
 		return c.Render("exercise/root.html", &T{
+			"IsExer":      true,
 			"has":         has,
 			"answers":     &answers,
 			"qusers":      &qusers,

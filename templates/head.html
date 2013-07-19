@@ -1,52 +1,27 @@
- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Go Daily - go语言每日一练 golang</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-<link rel="stylesheet" type="text/css" href="{{StaticUrl "bootstrap/css/bootstrap.min.css"}}" />
-<link rel="stylesheet" href="{{StaticUrl "codemirror/lib/codemirror.css"}}">
-    <link rel="stylesheet" href="{{StaticUrl "codemirror/theme/elegant.css"}}">
-<script src="{{StaticUrl "js/jquery.min.js"}}"></script>
-<script src="{{StaticUrl "codemirror/lib/codemirror.js"}}"></script>
-    <script src="{{StaticUrl "codemirror/addon/edit/matchbrackets.js"}}"></script>
-    <script src="{{StaticUrl "codemirror/mode/go/go.js"}}"></script>
-<style>.CodeMirror {
-    border:1px solid #999; background:#ffc;
-    height:200px; width: 700px;
-    }</style>
-<style>
-.footer {
-    text-align: center;
-    padding: 30px 0px;
-    margin-top: 70px;
-    border-top: 1px solid rgb(229, 229, 229);
-    background-color: rgb(245, 245, 245);
-}
-.frame {
-    margin-top:20px;
-}
-</style>
+{{include "header.tpl"}}
+        <title>Go Daily - Go语言每日一练|golang每日一练</title>
+        <script src="{{StaticUrl "js/jquery.min.js"}}"></script>
+        <script src="{{StaticUrl "codemirror/lib/codemirror.js"}}"></script>
+        <script src="{{StaticUrl "codemirror/addon/edit/matchbrackets.js"}}"></script>
+        <script src="{{StaticUrl "codemirror/mode/go/go.js"}}"></script>
+        <style>.CodeMirror {
+            border:1px solid #999; background:#ffc;
+            height:200px; width: 700px;
+            }
+        </style>
+        <style>
+        .footer {
+            text-align: center;
+            padding: 30px 0px;
+            margin-top: 70px;
+            border-top: 1px solid rgb(229, 229, 229);
+            background-color: rgb(245, 245, 245);
+        }
+        .frame {
+            margin-top:30px;
+        }
+        </style>
     </head>
-    <body style="padding-top: 60px;">
-        <div class="container">
- <div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-    <a class="brand" href="#">Go Daily</a>
-    <ul class="nav">
-    <li {{if isCurModule 1}} class="active"{{end}}><a href="/exercise/">每日一练</a></li>
-    <!--<li {{if isCurModule 2}} class="active"{{end}}><a href="/question/">每日问答</a></li>-->
-    <li {{if isCurModule 3}} class="active"{{end}}><a href="/about">关于</a></li>
-    </ul>
-    <div class="pull-right">
-        <ul class="nav">
-            <li>
-        {{if IsLogedIn}}<a href="{{.App.BasePath}}logout"><img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}} 退出</a>{{else}}<a href="/login">登录</a>{{end}}
-            </li>
-            <li><a href="/register">注册</a></li>
-        </ul>
-        </div>
-    </div>
-</div>
-</div>
+
+    <body>
+        {{include "navbar.tpl"}}

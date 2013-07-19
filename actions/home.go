@@ -1,49 +1,46 @@
 package actions
 
 import (
-	"fmt"
 	. "github.com/lunny/xorm"
-	. "github.com/lunny/xweb"
-	//. "xorm"
-	//. "xweb"
+	"github.com/lunny/xweb"
 )
 
 var (
-	Orm *Engine
+	Orm    *Engine
+	AppVer string
 )
 
-type MainAction struct {
+type HomeAction struct {
 	BaseAction
 
-	root     Mapper `xweb:"/"`
-	about    Mapper
-	register Mapper
-	login    Mapper
-	logout   Mapper
+	root     xweb.Mapper `xweb:"/"`
+	about    xweb.Mapper
+	register xweb.Mapper
+	login    xweb.Mapper
+	logout   xweb.Mapper
 
 	User       User
 	Message    string
 	RePassword string
 }
 
-func (c *MainAction) Init() {
+func (c *HomeAction) Init() {
 	c.BaseAction.Init()
-	c.AddFunc("isCurModule", c.IsCurModule)
 }
 
-func (c *MainAction) IsCurModule(cur int) bool {
-	return ABOUT_MODULE == cur
+func (c *HomeAction) About() {
+	c.Render("about.html", &xweb.T{
+		"IsAbout": true,
+	})
 }
 
-func (c *MainAction) About() {
-	c.Render("about.html")
+func (c *HomeAction) Root() error {
+	return c.Render("home/root.html", &xweb.T{
+		"IsHome": true,
+	})
 }
 
-func (c *MainAction) Root() {
-	c.Go("root", &ExerciseAction{})
-}
-
-func (c *MainAction) Login() error {
+func (c *HomeAction) Login() error {
 	if c.Method() == "GET" {
 		return c.Render("login.html")
 	} else if c.Method() == "POST" {
@@ -52,7 +49,6 @@ func (c *MainAction) Login() error {
 		if err == nil {
 			if has {
 				c.SetSession(USER_ID_TAG, c.User.Id)
-				fmt.Println(c.User)
 				c.SetSession(USER_NAME_TAG, c.User.LoginName)
 				c.SetSession(USER_AVATAR_TAG, c.User.Avatar)
 				return c.Go("root")
@@ -61,17 +57,17 @@ func (c *MainAction) Login() error {
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
 
-func (c *MainAction) Logout() error {
+func (c *HomeAction) Logout() error {
 	c.DelSession(USER_ID_TAG)
 	c.DelSession(USER_NAME_TAG)
 	c.DelSession(USER_AVATAR_TAG)
 	return c.Go("root")
 }
 
-func (c *MainAction) Register() error {
+func (c *HomeAction) Register() error {
 	if c.Method() == "GET" {
 		return c.Render("register.html")
 	} else if c.Method() == "POST" {
@@ -96,5 +92,5 @@ func (c *MainAction) Register() error {
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
