@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 
 	_ "github.com/go-sql-driver/mysql"
-	//. "github.com/lunny/xorm"
+	. "github.com/lunny/xorm"
 	. "github.com/lunny/xweb"
-	. "xorm"
+	//. "xorm"
+	//. "xweb"
 )
 
 func main() {

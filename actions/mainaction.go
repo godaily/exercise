@@ -1,9 +1,11 @@
 package actions
 
 import (
-	//. "github.com/lunny/xorm"
+	"fmt"
+	. "github.com/lunny/xorm"
 	. "github.com/lunny/xweb"
-	. "xorm"
+	//. "xorm"
+	//. "xweb"
 )
 
 var (
@@ -50,6 +52,7 @@ func (c *MainAction) Login() error {
 		if err == nil {
 			if has {
 				c.SetSession(USER_ID_TAG, c.User.Id)
+				fmt.Println(c.User)
 				c.SetSession(USER_NAME_TAG, c.User.LoginName)
 				c.SetSession(USER_AVATAR_TAG, c.User.Avatar)
 				return c.Go("root")
@@ -78,12 +81,13 @@ func (c *MainAction) Register() error {
 		u := &User{}
 		has, err := Orm.Sql("select * from user where login_name=? or email =?",
 			c.User.LoginName, c.User.Email).Get(u)
-		if err != nil {
-			return err
-		}
 		if has {
 			return c.Go("register?message=登录名或者email地址重复")
 		}
+		if err != nil {
+			return err
+		}
+
 		c.User.EncodePasswd()
 		c.User.BuildAvatar()
 		_, err = Orm.Insert(&c.User)

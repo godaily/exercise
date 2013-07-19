@@ -14,30 +14,11 @@ const (
 	ABOUT_MODULE
 )
 
-type Exercise struct {
-	Id         int64
-	CreatorId  int64
-	Creator    User `xorm:"creator_id int(11)"`
-	Created    time.Time
-	Title      string `xorm:"varchar(500)"`
-	Content    string `xorm:"text"`
-	ShowDate   time.Time
-	NumAnswers int
-}
-
-type ExerciseAnswer struct {
-	Id         int64
-	ExerciseId int64
-	Creator    User `xorm:"creator_id int(11)"`
-	Created    time.Time
-	Content    string `xorm:"text"`
-}
-
 type User struct {
 	Id           int64
-	LoginName    string `xorm:"unique"`
-	UserName     string
-	Email        string
+	LoginName    string `xorm:"unique not null"`
+	UserName     string `xorm:"not null"`
+	Email        string `xorm:"unique not null"`
 	Password     string `xorm:"varchar(128)"`
 	NumFollowers int
 	NumAsks      int
@@ -68,57 +49,71 @@ func (u *User) BuildAvatar() {
 	u.Avatar = fmt.Sprintf("http://www.gravatar.com/avatar/%v", dg)
 }
 
+type UserFollow struct {
+	UserId     int64
+	FollowerId int64
+	FollowTime time.Time
+}
+
 type Question struct {
 	Id           int64
-	Title        string `xorm:"varchar(200)"`
-	Content      string `xorm:"text"`
+	Type         int    `xorm:"not null"`
+	Title        string `xorm:"varchar(500) not null"`
+	Creator      User   `xorm:"creator_id int(11)"`
+	Content      string `xorm:"text not null"`
 	NumComments  int
 	NumFollowers int
 	NumAnswers   int
 	NumReads     int
 	NumUps       int
-	LastUpdated  time.Time
+	Created      time.Time `xorm:"not null"`
+	LastUpdated  time.Time `xorm:"not null"`
 }
 
 type QuestionFollow struct {
 	QuestionId int64
 	FollowerId int64
+	FollowTime time.Time
 }
 
-type UserFollow struct {
-	UserId     int64
-	FollowerId int64
+type QuestionComment struct {
+	Id          int64
+	QuestionId  int64
+	Creator     User      `xorm:"creator_id int(11)"`
+	Content     string    `xorm:"text not null"`
+	Created     time.Time `xorm:"not null"`
+	LastUpdated time.Time `xorm:"not null"`
 }
 
 type Answer struct {
 	Id          int64
 	QuestionId  int64
-	Content     string `xorm:"text"`
-	LastUpdated time.Time
+	Creator     User      `xorm:"creator_id int(11)"`
+	Content     string    `xorm:"text not null"`
+	Created     time.Time `xorm:"not null"`
+	LastUpdated time.Time `xorm:"not null"`
 	NumComments int
-	NumAgrees   int
+	NumUps      int
 }
 
-type AnswerAgree struct {
-	AnswerId int64
-	UserId   int64
-}
-
-type QuestionComment struct {
-	Id         int64
-	QuestionId int64
-	Content    string `xorm:"text"`
+type AnswerUp struct {
+	AnswerId   int64
+	UserId     int64
+	FollowTime time.Time
 }
 
 type AnswerComment struct {
-	Id       int64
-	AnswerId int64
-	Conetn   string `xorm:"text"`
+	Id          int64
+	AnswerId    int64
+	Creator     User      `xorm:"creator_id int(11)"`
+	Content     string    `xorm:"text not null"`
+	Created     time.Time `xorm:"not null"`
+	LastUpdated time.Time `xorm:"not null"`
 }
 
 type Tag struct {
 	Id    int64
-	Name  string `xorm:"unique"`
+	Name  string `xorm:"unique not null"`
 	Total int
 }
 
@@ -128,20 +123,22 @@ type QuestionTag struct {
 }
 
 type Message struct {
-	Id         int64
-	SenderId   int64
-	ReceiverId int64
-	Content    string `xorm:"text"`
+	Id       int64
+	Sender   User   `xorm:"sender_id int(11)"`
+	Receiver User   `xorm:"receiver_id int(11)"`
+	Content  string `xorm:"text not null"`
+	SendTime time.Time
+	ReadTime time.Time
 }
 
 type Topic struct {
 	Id           int64
 	ParentId     int64
-	Name         string
-	Url          string `xorm:"varchar(2048)"`
+	Name         string `xorm:"not null"`
+	Url          string `xorm:"varchar(2048) not null"`
 	NumFollowers int
 	NumQuestions int
-	AdminId      int64
+	Admin        User `xorm:"admin_id int(11)"`
 }
 
 type QuestionTopic struct {

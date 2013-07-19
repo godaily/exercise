@@ -4,6 +4,7 @@ import (
 	. "github.com/lunny/play-sdk"
 	. "github.com/lunny/xweb"
 	"time"
+	//. "xweb"
 )
 
 type ExerciseAction struct {
@@ -14,14 +15,27 @@ type ExerciseAction struct {
 	sub     Mapper
 	compile Mapper
 
-	Exercise Exercise
-	Answer   ExerciseAnswer
+	Exercise Question
+	Answer   Answer
 	Id       int64
+}
+
+var badges []string = []string{
+	"important",
+	"success",
+	"warning",
+	"info",
+	"inverse",
+}
+
+func GetBadge(i int) string {
+	return badges[i]
 }
 
 func (c *ExerciseAction) Init() {
 	c.BaseAction.Init()
 	c.AddFunc("isCurModule", c.IsCurModule)
+	c.AddFunc("getBadge", GetBadge)
 }
 
 func (c *ExerciseAction) IsCurModule(cur int) bool {
@@ -30,7 +44,7 @@ func (c *ExerciseAction) IsCurModule(cur int) bool {
 
 func (c *ExerciseAction) Add() error {
 	if c.Method() == "GET" {
-		recentExercises := make([]Exercise, 0)
+		recentExercises := make([]Question, 0)
 		err := Orm.OrderBy("created desc").Limit(5).Find(&recentExercises)
 		if err == nil {
 			return c.Render("exercise/add.html", &T{
@@ -41,7 +55,7 @@ func (c *ExerciseAction) Add() error {
 	} else if c.Method() == "POST" {
 		c.Exercise.Creator.Id = c.BaseAction.GetLoginUserId()
 		c.Exercise.Created = time.Now()
-		c.Exercise.ShowDate = time.Now()
+		c.Exercise.Type = EXERCISE_MODULE
 		session := Orm.NewSession()
 		defer session.Close()
 		err := session.Begin()
@@ -94,13 +108,13 @@ func (c *ExerciseAction) Sub() error {
 					_, err = session.Exec("update user set num_exercises=num_exercises+1 where id=?", c.GetLoginUserId())
 				}
 				if err == nil {
-					_, err = session.Exec("update exercise set num_answers=num_answers+1 where id=?", c.Id)
+					_, err = session.Exec("update question set num_answers=num_answers+1 where id=?", c.Id)
 				}
 			}
 			if err == nil {
 				err = session.Commit()
 			} else {
-				err = session.Rollback()
+				session.Rollback()
 			}
 
 			if err == nil {
@@ -120,15 +134,15 @@ func (c *ExerciseAction) Sub() error {
 }
 
 func (c *ExerciseAction) Root() error {
-	var preId, lastId int64
+	//var preId, lastId int64
 	has, err := Orm.Cascade(false).OrderBy("created desc").Get(&c.Exercise)
 	if err == nil {
-		var answers []ExerciseAnswer
+		var answers []Answer
 		var qusers, eusers []User
-		var curAnswer ExerciseAnswer
+		var curAnswer Answer
 		var hasSubmited bool
 		if has {
-			err = Orm.Find(&answers)
+			err = Orm.OrderBy("num_ups desc").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
@@ -142,7 +156,7 @@ func (c *ExerciseAction) Root() error {
 			}
 			if c.IsLogedIn() {
 				curAnswer.Creator.Id = c.GetLoginUserId()
-				curAnswer.ExerciseId = c.Exercise.Id
+				curAnswer.QuestionId = c.Exercise.Id
 				hasSubmited, err = Orm.Get(&curAnswer)
 				if err != nil {
 					return err

@@ -6,7 +6,7 @@
 		<div class="container">
 			<div class="row">
 			<div class="span6">
-				<span><h2>{{.Exercise.Title}}</h2></span><span><!--({{FormatDate .Exercise.ShowDate "2006-01-02"}})--></span>
+				<span><h2>{{.Exercise.Title}}</h2></span>
 					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.LoginName}} 发布于 
 	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
 					</span>
@@ -26,8 +26,7 @@
 		</div>
 		</div>
 			<div class="row">
-				
-				<div class="span9">
+				<div class="span9" style="margin-bottom:10px">
 					{{if IsLogedIn}}<a href="#">{{end}}
 				{{range .T.answers}}
 					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
@@ -56,10 +55,14 @@
       {{end}}
     </script>
 	<p class="frame">
-		<a id="btnCompile" href="#" class="btn btn-large">测试结果</a>&nbsp; &nbsp; 
+		<a id="btnCompile" class="btn btn-large">测试结果</a>&nbsp; &nbsp; 
 		<script>
 		$(function(){
 			$('#btnCompile').click(function(){
+				if (editor.getValue() == "") {
+					$('#message').text("内容不能为空 ...")
+					return
+				}
 				$('#btnCompile').click(function(){})
 				$('#btnCompile').addClass('disabled')
 				$('#btnSubmit').addClass('disabled')
@@ -87,10 +90,11 @@
 			});
 		});
 		</script>
-		<input type="hidden" name="answer.exerciseId" value="{{.Id}}"/>
+		{{if IsLogedIn}}
+		<input type="hidden" name="answer.questionId" value="{{.Exercise.Id}}"/>
 		{{if .T.hasSubmited}}<input type="hidden" name="answer.id" value="{{.T.curAnswer.Id}}"/>
 		{{end}}
-	<input id="btnSubmit" type="submit" class="btn btn-primary btn-large" value="提交答案"/>&nbsp; &nbsp; <span id="message" style="color:red"></span>
+	<input id="btnSubmit" type="submit" class="btn btn-primary btn-large" value="提交答案"/>{{end}}&nbsp; &nbsp; <span id="message" style="color:red"></span>
 	</p>
 </form>
 		</div>
@@ -110,12 +114,12 @@
 
 		<div class="frame">
 			<table class="table table-bordered">
-			<thead><tr><td><div class="text-center">出题排行榜</div></td></tr></thead>
+			<thead><tr><td><div class="text-center"><strong>出题排行榜</strong></div></td></tr></thead>
 			<tbody>
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
-				{{range .T.qusers}}
-			<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 出题 {{.NumQuestions}} 道</li>
+				{{range $idx, $user := .T.qusers}}
+			<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{$user.Avatar}}?s=16"/>&nbsp; {{$user.LoginName}} 出题 {{$user.NumQuestions}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -123,12 +127,12 @@
 
 		<div class="frame">
 			<table class="table table-bordered">
-			<thead><tr><td><div class="text-center">做题排行榜</div></td></tr></thead>
+			<thead><tr><td><div class="text-center"><strong>做题排行榜</strong></div></td></tr></thead>
 			<tbody>
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
-				{{range .T.eusers}}
-				<li><img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 做题 {{.NumExercises}} 道</li>
+				{{range $idx, $user := .T.eusers}}
+				<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 做题 {{.NumExercises}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
