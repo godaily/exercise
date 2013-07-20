@@ -15,13 +15,13 @@
 		            <li>
 		        	{{if IsLogedIn}}
 		        		<a href="{{.App.BasePath}}{{GetLoginUserName}}">
-		        			<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}}</a>
+		        			<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}}</a></li>
+		        			<li>
 		        		<a href="{{.App.BasePath}}logout">退出</a>
 		        	{{else}}
 		        		<a href="/login">登录</a>
 		        	{{end}}
-		            </li>	
-
+		            </li>
 		            <li>
 		            	<a href="/register">注册</a>
 		            </li>

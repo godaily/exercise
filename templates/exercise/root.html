@@ -1,4 +1,5 @@
 {{include "head.html"}}
+{{$basePath := .App.BasePath}}
 <div class="container frame">
 <div class="row">
 	<div class="span9">
@@ -31,7 +32,7 @@
 		</div>
 			<div class="row">
 				<div class="span9" style="margin-bottom:10px">
-					{{if IsLogedIn}}<a href="#">{{end}}
+					{{if IsLogedIn}}<a id="showAnswers" href="#">{{end}}
 				{{range .T.answers}}
 					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
 				{{end}}
@@ -39,9 +40,20 @@
 				{{if IsLogedIn}}{{else}}，提交您的答案后可查看其他答案{{end}}。
 			{{if IsLogedIn}}</a>{{end}}
 				</div>
+				{{if IsLogedIn}}
+				<div id="answers" class="span9">
+						{{range .T.answers}}
+						<div style="border-top:solid dot 1px">
+							<img src="{{.Creator.Avatar}}?s=16"/>
+							{{.Creator.LoginName}} 发布于 {{FormatDate .Created "2006-01-02 03:04:05"}}</div>
+						<div>{{.Content}}</div>
+						{{end}}
+				</div>
+				{{end}}
 			</div>
 			
 			<div class="container">
+				<h4>我的回答</h4>
 <form method="post" action="{{.App.BasePath}}exercise/sub?id={{.Exercise.Id}}">
 	<textarea name="answer.content" id="code"></textarea>
 	<script>
@@ -62,6 +74,12 @@
 		<a id="btnCompile" class="btn btn-large">测试结果</a>&nbsp; &nbsp; 
 		<script>
 		$(function(){
+			{{if IsLogedIn}}
+			$('#answers').hide()
+			$('#showAnswers').click(function(){
+				$('#answers').toggle()
+			})
+			{{end}}
 			$('#btnCompile').click(function(){
 				if (editor.getValue() == "") {
 					$('#message').text("内容不能为空 ...")
@@ -123,7 +141,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range $idx, $user := .T.qusers}}
-			<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{$user.Avatar}}?s=16"/>&nbsp; {{$user.LoginName}} 出题 {{$user.NumQuestions}} 道</li>
+			<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{$user.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.LoginName}}</a> 出题 {{$user.NumQuestions}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -136,7 +154,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range $idx, $user := .T.eusers}}
-				<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{.Avatar}}?s=16"/>&nbsp; {{.LoginName}} 做题 {{.NumExercises}} 道</li>
+				<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.LoginName}}</a> 做题 {{.NumExercises}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>

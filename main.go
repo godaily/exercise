@@ -18,6 +18,7 @@ func init() {
 }
 
 func main() {
+	// load config
 	var err error
 	data, err := ioutil.ReadFile("config.ini")
 	if err != nil {
@@ -27,6 +28,7 @@ func main() {
 
 	cfgs := SimpleParse(string(data))
 
+	// create Orm
 	actions.Orm, err = NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		cfgs["dbuser"], cfgs["dbpasswd"], cfgs["dbhost"], cfgs["dbname"]))
 	if err != nil {
@@ -35,15 +37,23 @@ func main() {
 	}
 	actions.Orm.ShowSQL = true
 
+	// add actions
 	AddAction(&actions.HomeAction{})
 	AddRouter("/exercise", &actions.ExerciseAction{})
 	AddRouter("/question", &actions.QuestionAction{})
+	AddAction(&actions.UserAction{})
+
+	// add login filter
 	app := MainServer().RootApp
-	app.AddFunc("AppVer", func() string {
-		return "v" + APP_VER
-	})
 	loginFilter := NewLoginFilter(app, actions.USER_ID_TAG, "/login")
 	loginFilter.AddAskLoginUrls("/exercise/add", "/exercise/sub")
 	app.AddFilter(loginFilter)
+
+	// add func app scope
+	app.AddFunc("AppVer", func() string {
+		return "v" + APP_VER
+	})
+
+	// run the web server
 	Run("0.0.0.0:" + cfgs["port"])
 }
