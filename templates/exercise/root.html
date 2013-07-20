@@ -43,10 +43,23 @@
 				{{if IsLogedIn}}
 				<div id="answers" class="span9">
 						{{range .T.answers}}
-						<div style="border-top:solid dot 1px">
+						<div id="a{{.Id}}"style="border-top:solid dot 1px">
 							<img src="{{.Creator.Avatar}}?s=16"/>
 							{{.Creator.LoginName}} 发布于 {{FormatDate .Created "2006-01-02 03:04:05"}}</div>
 						<div>{{.Content}}</div>
+						<script>
+						var el = CodeMirror(document.getElementById("a{{.Id}}"), {
+							lineNumbers:true,
+					        theme: "elegant",
+					        matchBrackets: true,
+					        indentUnit: 8,
+					        tabSize: 8,
+					        readOnly: true,
+					        indentWithTabs: true,
+					        mode: "text/x-go"
+						});
+						el.setValue('{{.Content}}')
+						</script>
 						{{end}}
 				</div>
 				{{end}}

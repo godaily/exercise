@@ -3,6 +3,7 @@ package actions
 import (
 	. "github.com/lunny/xorm"
 	"github.com/lunny/xweb"
+	"regexp"
 )
 
 var (
@@ -44,6 +45,9 @@ func (c *HomeAction) Login() error {
 	if c.Method() == "GET" {
 		return c.Render("login.html")
 	} else if c.Method() == "POST" {
+		if len(c.User.LoginName) <= 0 {
+			return c.Go("login?message=登录名不能为空")
+		}
 		c.User.EncodePasswd()
 		has, err := Orm.Get(&c.User)
 		if err == nil {
@@ -71,6 +75,22 @@ func (c *HomeAction) Register() error {
 	if c.Method() == "GET" {
 		return c.Render("register.html")
 	} else if c.Method() == "POST" {
+		if len(c.User.LoginName) <= 0 {
+			return c.Go("register?message=登录名不能为空")
+		}
+		if len(c.User.Email) <= 0 {
+			return c.Go("register?message=email地址不能为空")
+		}
+		isEmail, err := regexp.MatchString("\\w*@\\w*.\\w*", c.User.Email)
+		if err != nil {
+			return err
+		}
+		if !isEmail {
+			return c.Go("register?message=email地址不正确")
+		}
+		if len(c.User.Password) <= 0 {
+			return c.Go("register?message=密码不能为空")
+		}
 		if c.RePassword != c.User.Password {
 			return c.Go("register?message=两次密码不匹配")
 		}
