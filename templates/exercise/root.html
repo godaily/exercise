@@ -13,8 +13,12 @@
 			</div>
 			<div class="span3">
 			    <ul class="pager">
-			    <li><a href="#">&larr; 上一题</a></li>
-			    <li><a href="#">下一题 &rarr;</a></li>
+			    <li>
+			    	<a href="{{if Eq .T.preId 0}}#{{else}}{{.App.BasePath}}exercise/?id={{.T.preId}}{{end}}">&larr; 上一题</a>
+			    	</li>
+			    <li>
+			    	<a href="{{if Eq .T.lastId 0}}#{{else}}{{.App.BasePath}}exercise/?id={{.T.lastId}}{{end}}">下一题 &rarr;</a>
+			    	</li>
 			    </ul>
 			</div>
 		</div>

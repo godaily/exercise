@@ -129,14 +129,31 @@ func (c *ExerciseAction) Sub() error {
 }
 
 func (c *ExerciseAction) Root() error {
-	//var preId, lastId int64
-	has, err := Orm.Cascade(false).OrderBy("created desc").Get(&c.Exercise)
+	var has bool
+	var err error
+	if c.Id == 0 {
+		has, err = Orm.OrderBy("created desc").Get(&c.Exercise)
+	} else {
+		has, err = Orm.Id(c.Id).Get(&c.Exercise)
+	}
 	if err == nil {
 		var answers []Answer
 		var qusers, eusers []User
 		var curAnswer Answer
 		var hasSubmited bool
+		var pre, last Question
+		var preId, lastId int
 		if has {
+			_, err = Orm.Where("id < ?", c.Exercise.Id).Get(&pre)
+			if err != nil {
+				return err
+			}
+			preId = int(pre.Id)
+			_, err = Orm.Where("id > ?", c.Exercise.Id).Get(&last)
+			if err != nil {
+				return err
+			}
+			lastId = int(last.Id)
 			err = Orm.OrderBy("num_ups desc").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
@@ -161,6 +178,8 @@ func (c *ExerciseAction) Root() error {
 		return c.Render("exercise/root.html", &T{
 			"IsExer":      true,
 			"has":         has,
+			"preId":       preId,
+			"lastId":      lastId,
 			"answers":     &answers,
 			"qusers":      &qusers,
 			"eusers":      &eusers,
