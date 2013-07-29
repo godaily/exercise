@@ -3,6 +3,7 @@
 <div class="row frame">
 <div class="span9">
 	<form method="post">
+		{{XsrfFormHtml}}
 	<input type="text" name="exercise.title" class="span9" placeholder="输入练习的标题"/>
 	<textarea class="ckeditor" placeholder="输入练习的具体内容" name="exercise.content" id="content"></textarea>
 	<script>

@@ -36,9 +36,10 @@ func (c *HomeAction) About() {
 }
 
 func (c *HomeAction) Root() error {
-	return c.Render("home/root.html", &xweb.T{
+	return c.Go("root", &ExerciseAction{})
+	/*return c.Render("home/root.html", &xweb.T{
 		"IsHome": true,
-	})
+	})*/
 }
 
 func (c *HomeAction) Login() error {

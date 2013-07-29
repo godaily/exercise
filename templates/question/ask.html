@@ -2,6 +2,7 @@
 <div class="row">
 <div class="span9">
 	<form method="post">
+		{{XsrfFormHtml}}
 	<input type="text" name="theQuestion.title"/>
 	<textarea class="ckeditor" name="theQuestion.content" id="content"></textarea>
 	<script>

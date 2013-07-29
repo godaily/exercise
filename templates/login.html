@@ -39,6 +39,7 @@
 <body>
 	<div class="container">
 		<form class="form-signin" method="post">
+      {{XsrfFormHtml}}
         <h2 class="form-signin-heading">登录 Go Daily</h2>
         <input name="user.loginName" type="text" class="input-block-level" placeholder="账号">
         <input name="user.password" type="password" class="input-block-level" placeholder="密码">

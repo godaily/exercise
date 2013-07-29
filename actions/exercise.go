@@ -10,13 +10,18 @@ import (
 type ExerciseAction struct {
 	BaseAction
 
-	root    Mapper `xweb:"/"`
-	add     Mapper
-	sub     Mapper
-	compile Mapper
+	root        Mapper `xweb:"/"`
+	add         Mapper
+	sub         Mapper
+	compile     Mapper
+	addQComment Mapper `xweb:"POST"`
+	addAComment Mapper `xweb:"POST"`
+	upAnswer    Mapper
 
 	Exercise Question
 	Answer   Answer
+	QComment QuestionComment
+	AComment AnswerComment
 	Id       int64
 }
 
@@ -35,6 +40,30 @@ func GetBadge(i int) string {
 func (c *ExerciseAction) Init() {
 	c.BaseAction.Init()
 	c.AddFunc("getBadge", GetBadge)
+	c.AddVar("IsExer", true)
+}
+
+func (c *ExerciseAction) UpAnswer() {
+	if c.Id > 0 {
+		au := &AnswerUp{AnswerId: c.Id, UserId: c.GetLoginUserId()}
+		has, err := Orm.Get(au)
+		if err == nil {
+			if !has {
+				_, err = Orm.Insert(au)
+				if err == nil {
+					c.ServeJson(map[string]interface{}{"res": 1})
+					return
+				}
+			} else {
+				c.ServeJson(map[string]interface{}{"res": 2})
+				return
+			}
+		}
+		c.ServeJson(map[string]interface{}{"res": 0, "error": err.Error()})
+		return
+	}
+	c.ServeJson(map[string]interface{}{"res": 0, "error": "无效参数"})
+	return
 }
 
 func (c *ExerciseAction) Add() error {
@@ -118,7 +147,7 @@ func (c *ExerciseAction) Sub() error {
 			return err
 		} else {
 			c.Answer.Created = time.Now()
-			_, err := Orm.Update(&c.Answer)
+			_, err := Orm.Id(c.Answer.Id).Update(&c.Answer)
 			if err == nil {
 				return c.Render("exercise/subok.html")
 			}
@@ -143,21 +172,39 @@ func (c *ExerciseAction) Root() error {
 		var hasSubmited bool
 		var pre, last Question
 		var preId, lastId int
+		var qcomments []QuestionComment
+		var acomments map[int64][]AnswerComment = make(map[int64][]AnswerComment)
 		if has {
-			_, err = Orm.Where("id < ?", c.Exercise.Id).Get(&pre)
+			_, err = Orm.OrderBy("id desc").Where("id < ?", c.Exercise.Id).Get(&pre)
 			if err != nil {
 				return err
 			}
 			preId = int(pre.Id)
-			_, err = Orm.Where("id > ?", c.Exercise.Id).Get(&last)
+			_, err = Orm.OrderBy("id asc").Where("id > ?", c.Exercise.Id).Get(&last)
 			if err != nil {
 				return err
 			}
+
+			err = Orm.OrderBy("created asc").Find(&qcomments, &QuestionComment{QuestionId: c.Exercise.Id})
+			if err != nil {
+				return err
+			}
+
 			lastId = int(last.Id)
 			err = Orm.OrderBy("num_ups desc").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
+
+			for _, answer := range answers {
+				var ac []AnswerComment
+				err = Orm.OrderBy("created asc").Find(&ac, &AnswerComment{AnswerId: answer.Id})
+				if err != nil {
+					return err
+				}
+				acomments[answer.Id] = ac
+			}
+
 			err = Orm.OrderBy("num_questions desc").Limit(5).Find(&qusers)
 			if err != nil {
 				return err
@@ -176,7 +223,6 @@ func (c *ExerciseAction) Root() error {
 			}
 		}
 		return c.Render("exercise/root.html", &T{
-			"IsExer":      true,
 			"has":         has,
 			"preId":       preId,
 			"lastId":      lastId,
@@ -185,7 +231,37 @@ func (c *ExerciseAction) Root() error {
 			"eusers":      &eusers,
 			"hasSubmited": hasSubmited,
 			"curAnswer":   curAnswer,
+			"qcomments":   qcomments,
+			"acomments":   acomments,
 		})
 	}
 	return err
+}
+
+func (c *ExerciseAction) AddQComment() error {
+	if c.Id == 0 {
+		c.QComment.Creator.Id = c.GetLoginUserId()
+		c.QComment.Created = time.Now()
+		c.QComment.LastUpdated = time.Now()
+		_, err := Orm.Insert(&c.QComment)
+		return err
+	} else {
+		c.QComment.LastUpdated = time.Now()
+		_, err := Orm.Id(c.QComment.Id).Update(&c.QComment)
+		return err
+	}
+}
+
+func (c *ExerciseAction) AddAComment() error {
+	if c.Id == 0 {
+		c.AComment.Creator.Id = c.GetLoginUserId()
+		c.AComment.Created = time.Now()
+		c.AComment.LastUpdated = time.Now()
+		_, err := Orm.Insert(&c.AComment)
+		return err
+	} else {
+		c.AComment.LastUpdated = time.Now()
+		_, err := Orm.Id(c.AComment.Id).Update(&c.AComment)
+		return err
+	}
 }

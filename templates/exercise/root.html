@@ -1,13 +1,15 @@
 {{include "head.html"}}
 {{$basePath := .App.BasePath}}
+{{$t := .T}}
 <div class="container frame">
 <div class="row">
 	<div class="span9">
 	{{if .T.has}}
-		<div class="container">
-			<div class="row">
+		<div class="row">
+			<div class="span9">
+				<div class="row">
 			<div class="span6">
-				<span><h2>{{.Exercise.Title}}</h2></span>
+				<span><h3>第 {{Add .Id 1}} 题&nbsp;  {{.Exercise.Title}}</h3></span>
 					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.LoginName}} 发布于 
 	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
 					</span>
@@ -23,15 +25,34 @@
 			    </ul>
 			</div>
 		</div>
-		<div class="row">
-			<div class="span9">
+		</div>
+		<div class="span9">
 			<div class="hero-unit text-left">
 			  {{Html .Exercise.Content}}
 			</div>
 		</div>
-		</div>
-			<div class="row">
-				<div class="span9" style="margin-bottom:10px">
+			<div class="span9">
+				<div style="margin-bottom:10px;padding-left:30px;">
+					{{range $t.qcomments}}
+					<div style="margin-bottom:10px;padding-left:30px;">
+						{{.Content}}
+					</div>
+					{{end}}
+					{{if IsLogedIn}}
+					<div style="margin-bottom:10px;">
+						<a href="javascript:$('#qcomment').toggle();void(0);" class="btn">添加评论</a>
+					</div>
+					<div id="qcomment" style="display:none">
+    				<form method="post" action="{{$basePath}}exercise/addQComment">
+			    	{{XsrfFormHtml}}
+			    	<input type="hidden" name="qComment.questionId" value="{{.Id}}"/>
+			    	<textarea name="qComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
+			    	<a href="javascript:addqcomment();" class="btn">保存</a>
+			    </form>
+			    </div>
+					{{end}}
+				</div>
+				<div class="topsplit" style="padding-top:10px;margin-bottom:10px">
 					{{if IsLogedIn}}<a id="showAnswers" href="#">{{end}}
 				{{range .T.answers}}
 					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
@@ -41,15 +62,47 @@
 			{{if IsLogedIn}}</a>{{end}}
 				</div>
 				{{if IsLogedIn}}
-				<div id="answers" class="span9">
+				<div id="answers">
 						{{range .T.answers}}
-						<div id="a{{.Id}}"style="border-top:solid dot 1px">
+						<div class="topsplit">
+							<div class="row">
+							<div class="span1">
+								<table class="table table-bordered" style="margin-top:10px;">
+									<tr><td>
+										<div class="text-center">
+								<h4>{{.NumUps}}</h4>
+							</div>
+							</td></tr>
+							</table>
+							</div>
+						<div class="span8">
 							<img src="{{.Creator.Avatar}}?s=16"/>
-							{{.Creator.LoginName}} 发布于 {{FormatDate .Created "2006-01-02 03:04:05"}}</div>
-						<div>{{.Content}}</div>
+							{{.Creator.LoginName}} 回答于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+							<div  id="a{{.Id}}">
+							</div>
+						
+						{{range $t.qcomments}}
+						<div style="margin-bottom:10px;padding-left:30px;">
+							{{.Content}}
+						</div>
+						{{end}}
+						<div style="padding-left:30px;margin-top:10px;margin-bottom:10px;">
+							<a href="javascript:$('#acomment{{.Id}}').toggle();void(0);" class="btn">添加评论</a>
+						</div>
+						<div id="acomment{{.Id}}" style="padding-left:30px;display:none">
+    <form method="post" action="{{$basePath}}exercise/addAComment">
+    	{{XsrfFormHtml}}
+    	<input type="hidden" name="aComment.answerId" value="{{.Id}}"/>
+    	<textarea name="aComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
+    	<a href="javascript:addacomment();" class="btn">保存</a>
+    </form>
+    </div>
+						</div>
+					</div>
+					</div>
 						<script>
 						var el = CodeMirror(document.getElementById("a{{.Id}}"), {
-							lineNumbers:true,
+							lineNumbers:false,
 					        theme: "elegant",
 					        matchBrackets: true,
 					        indentUnit: 8,
@@ -64,10 +117,10 @@
 				</div>
 				{{end}}
 			</div>
-			
-			<div class="container">
+			<div class="span9 topsplit">
 				<h4>我的回答</h4>
 <form method="post" action="{{.App.BasePath}}exercise/sub?id={{.Exercise.Id}}">
+	{{XsrfFormHtml}}
 	<textarea name="answer.content" id="code"></textarea>
 	<script>
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {

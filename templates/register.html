@@ -40,6 +40,7 @@
 <body>
 	<div class="container">
 		<form class="form-signin" method="post">
+      {{XsrfFormHtml}}
         <h2 class="form-signin-heading">注册系统</h2>
         <input name="user.loginName" type="text" class="input-block-level" placeholder="登录账号">
         <input name="user.userName" type="text" class="input-block-level" placeholder="真实姓名">
