@@ -9,7 +9,7 @@
 			<div class="span9">
 				<div class="row">
 			<div class="span6">
-				<span><h3>第 {{Add .Id 1}} 题&nbsp;  {{.Exercise.Title}}</h3></span>
+				<span><h3>第 {{.Exercise.Id}} 题&nbsp;  {{.Exercise.Title}}</h3></span>
 					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.LoginName}} 发布于 
 	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
 					</span>
@@ -34,8 +34,11 @@
 			<div class="span9">
 				<div style="margin-bottom:10px;padding-left:30px;">
 					{{range $t.qcomments}}
-					<div style="margin-bottom:10px;padding-left:30px;">
+					<div style="margin-bottom:10px;">
+						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 发表评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+						<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">
 						{{.Content}}
+						</div>
 					</div>
 					{{end}}
 					{{if IsLogedIn}}
@@ -43,17 +46,25 @@
 						<a href="javascript:$('#qcomment').toggle();void(0);" class="btn">添加评论</a>
 					</div>
 					<div id="qcomment" style="display:none">
-    				<form method="post" action="{{$basePath}}exercise/addQComment">
+    				<form id="qcommentform" method="post" action="{{$basePath}}exercise/addQComment">
 			    	{{XsrfFormHtml}}
-			    	<input type="hidden" name="qComment.questionId" value="{{.Id}}"/>
+			    	<input type="hidden" name="qComment.questionId" value="{{.Exercise.Id}}"/>
 			    	<textarea name="qComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
-			    	<a href="javascript:addqcomment();" class="btn">保存</a>
+			    	<a href="javascript:void(0);" onclick="addqcomment();" class="btn">保存</a>
 			    </form>
+			    <script>
+			    	function addqcomment() {
+							$('#qcommentform').ajaxSubmit(function() {
+								alert("添加评论成功")
+							});
+							return false;
+						}
+			    </script>
 			    </div>
 					{{end}}
 				</div>
 				<div class="topsplit" style="padding-top:10px;margin-bottom:10px">
-					{{if IsLogedIn}}<a id="showAnswers" href="#">{{end}}
+					{{if IsLogedIn}}<a id="showAnswers" href="javascript:void(0);">{{end}}
 				{{range .T.answers}}
 					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
 				{{end}}
@@ -63,6 +74,19 @@
 				</div>
 				{{if IsLogedIn}}
 				<div id="answers">
+					<script>
+								function up(obj, id) {
+									url = "{{$basePath}}exercise/upAnswer?id="+id
+									url = url.replace("\/", "/")
+									$.get(url, '', function(data, textStatus, jqXHR){
+										if (data['res'] == 1) {
+											$(obj).text(parseInt($(obj).text())+1)
+										} else if (data['res'] == 0) {
+											alert(data['error'])
+										}
+									})
+								}
+								</script>
 						{{range .T.answers}}
 						<div class="topsplit">
 							<div class="row">
@@ -70,7 +94,8 @@
 								<table class="table table-bordered" style="margin-top:10px;">
 									<tr><td>
 										<div class="text-center">
-								<h4>{{.NumUps}}</h4>
+								<h4><a href="javascript:void(0);" onclick="up(this, {{.Id}});">{{.NumUps}}</a></h4>
+
 							</div>
 							</td></tr>
 							</table>
@@ -80,27 +105,38 @@
 							{{.Creator.LoginName}} 回答于 {{FormatDate .Created "2006-01-02 03:04:05"}}
 							<div  id="a{{.Id}}">
 							</div>
-						
-						{{range $t.qcomments}}
-						<div style="margin-bottom:10px;padding-left:30px;">
-							{{.Content}}
+							{{with $x := index $t.acomments .Id}}
+						{{range $x}}
+						<div style="margin-bottom:10px;">
+						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 发表评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+						<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">
+						{{.Content}}
 						</div>
+					</div>
+						{{end}}
 						{{end}}
 						<div style="padding-left:30px;margin-top:10px;margin-bottom:10px;">
 							<a href="javascript:$('#acomment{{.Id}}').toggle();void(0);" class="btn">添加评论</a>
 						</div>
 						<div id="acomment{{.Id}}" style="padding-left:30px;display:none">
-    <form method="post" action="{{$basePath}}exercise/addAComment">
+    <form id="acommentform{{.Id}}" method="post" action="{{$basePath}}exercise/addAComment">
     	{{XsrfFormHtml}}
     	<input type="hidden" name="aComment.answerId" value="{{.Id}}"/>
     	<textarea name="aComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
-    	<a href="javascript:addacomment();" class="btn">保存</a>
+    	<a href="javascript:void(0);" onclick="addacomment({{.Id}});" class="btn">保存</a>
     </form>
     </div>
 						</div>
 					</div>
 					</div>
-						<script>
+					<script>
+			    	function addacomment(id) {
+							$('#acommentform'+id).ajaxSubmit(function() {
+								alert("添加评论成功")
+							});
+							return false;
+						}
+
 						var el = CodeMirror(document.getElementById("a{{.Id}}"), {
 							lineNumbers:false,
 					        theme: "elegant",

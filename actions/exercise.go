@@ -49,7 +49,21 @@ func (c *ExerciseAction) UpAnswer() {
 		has, err := Orm.Get(au)
 		if err == nil {
 			if !has {
-				_, err = Orm.Insert(au)
+				session := Orm.NewSession()
+				defer session.Close()
+				err = session.Begin()
+				if err == nil {
+					au.UpTime = time.Now()
+					_, err = session.Insert(au)
+				}
+				if err == nil {
+					_, err = session.Exec("update answer set num_ups=num_ups+1 where id = ?", c.Id)
+				}
+				if err != nil {
+					session.Rollback()
+				} else {
+					err = session.Commit()
+				}
 				if err == nil {
 					c.ServeJson(map[string]interface{}{"res": 1})
 					return
@@ -124,6 +138,7 @@ func (c *ExerciseAction) Sub() error {
 			session := Orm.NewSession()
 			defer session.Close()
 			c.Answer.Created = time.Now()
+			c.Answer.LastUpdated = c.Answer.Created
 			c.Answer.Creator.Id = c.GetLoginUserId()
 			err := session.Begin()
 			if err == nil {
@@ -238,30 +253,39 @@ func (c *ExerciseAction) Root() error {
 	return err
 }
 
-func (c *ExerciseAction) AddQComment() error {
+func (c *ExerciseAction) AddQComment() {
+	var err error
 	if c.Id == 0 {
 		c.QComment.Creator.Id = c.GetLoginUserId()
 		c.QComment.Created = time.Now()
 		c.QComment.LastUpdated = time.Now()
-		_, err := Orm.Insert(&c.QComment)
-		return err
+		_, err = Orm.Insert(&c.QComment)
+
 	} else {
 		c.QComment.LastUpdated = time.Now()
-		_, err := Orm.Id(c.QComment.Id).Update(&c.QComment)
-		return err
+		_, err = Orm.Id(c.QComment.Id).Update(&c.QComment)
+	}
+	if err == nil {
+		c.ServeJson(map[string]interface{}{"error": ""})
+	} else {
+		c.ServeJson(map[string]interface{}{"error": err.Error()})
 	}
 }
 
-func (c *ExerciseAction) AddAComment() error {
+func (c *ExerciseAction) AddAComment() {
+	var err error
 	if c.Id == 0 {
 		c.AComment.Creator.Id = c.GetLoginUserId()
 		c.AComment.Created = time.Now()
 		c.AComment.LastUpdated = time.Now()
-		_, err := Orm.Insert(&c.AComment)
-		return err
+		_, err = Orm.Insert(&c.AComment)
 	} else {
 		c.AComment.LastUpdated = time.Now()
-		_, err := Orm.Id(c.AComment.Id).Update(&c.AComment)
-		return err
+		_, err = Orm.Id(c.AComment.Id).Update(&c.AComment)
+	}
+	if err == nil {
+		c.ServeJson(map[string]interface{}{"error": ""})
+	} else {
+		c.ServeJson(map[string]interface{}{"error": err.Error()})
 	}
 }

@@ -55,5 +55,5 @@ func main() {
 	})
 
 	// run the web server
-	Run("0.0.0.0:" + cfgs["port"])
+	Run(fmt.Sprintf("%v:%v", cfgs["address"], cfgs["port"]))
 }
