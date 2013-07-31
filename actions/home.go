@@ -54,7 +54,7 @@ func (c *HomeAction) Login() error {
 		if err == nil {
 			if has {
 				c.SetSession(USER_ID_TAG, c.User.Id)
-				c.SetSession(USER_NAME_TAG, c.User.LoginName)
+				c.SetSession(USER_NAME_TAG, c.User.UserName)
 				c.SetSession(USER_AVATAR_TAG, c.User.Avatar)
 				return c.Go("root")
 			}

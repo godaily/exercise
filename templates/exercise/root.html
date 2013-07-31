@@ -1,6 +1,7 @@
 {{include "head.html"}}
 {{$basePath := .App.BasePath}}
 {{$t := .T}}
+{{$userId := GetLoginUserId}}
 <div class="container frame">
 <div class="row">
 	<div class="span9">
@@ -10,8 +11,10 @@
 				<div class="row">
 			<div class="span6">
 				<span><h3>第 {{.Exercise.Id}} 题&nbsp;  {{.Exercise.Title}}</h3></span>
-					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.LoginName}} 发布于 
+					<span><img src="{{.Exercise.Creator.Avatar}}?s=16"/> {{.Exercise.Creator.UserName}} 发布于 
 	{{FormatDate .Exercise.Created "2006-01-02 03:04:05"}}
+		{{if Eq $userId .Exercise.Creator.Id}}<a href="{{$basePath}}exercise/edit?id={{.Exercise.Id}}"><i class="icon-pencil"></i></a>
+						{{end}}
 					</span>
 			</div>
 			<div class="span3">
@@ -31,42 +34,65 @@
 			  {{Html .Exercise.Content}}
 			</div>
 		</div>
+		<script>
+			function delqcomment(id) {
+				    	$.get("{{$basePath}}exercise/delQComment?id="+id, function() {
+				    			alert("删除成功！");
+				    			$('#qcomment'+id).remove();
+				    	});
+				    }
+		</script>
 			<div class="span9">
 				<div style="margin-bottom:10px;padding-left:30px;">
+					<div id="qcommentcontainer">
 					{{range $t.qcomments}}
-					<div style="margin-bottom:10px;">
-						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 发表评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+					<div id="qcomment{{.Id}}" style="margin-bottom:10px;">
+						<div>
+						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+						{{if Eq $userId .Creator.Id}}<a href="javascript:void(0);" onclick="delqcomment({{.Id}});" class="btn btn-mini">&times;</a>
+						{{end}}
+					</div>
 						<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">
 						{{.Content}}
 						</div>
 					</div>
 					{{end}}
-					{{if IsLogedIn}}
-					<div style="margin-bottom:10px;">
-						<a href="javascript:$('#qcomment').toggle();void(0);" class="btn">添加评论</a>
 					</div>
-					<div id="qcomment" style="display:none">
+					{{if IsLogedIn}}
+					<div id="qcomment">
     				<form id="qcommentform" method="post" action="{{$basePath}}exercise/addQComment">
 			    	{{XsrfFormHtml}}
 			    	<input type="hidden" name="qComment.questionId" value="{{.Exercise.Id}}"/>
-			    	<textarea name="qComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
-			    	<a href="javascript:void(0);" onclick="addqcomment();" class="btn">保存</a>
+			    	<textarea id="qcommentta" name="qComment.content" class="span6" rows="2" placehoder="请在此输入评论"></textarea><br/>
+			    	<a href="javascript:void(0);" onclick="addqcomment();" class="btn">提交评论</a>
 			    </form>
 			    <script>
 			    	function addqcomment() {
-							$('#qcommentform').ajaxSubmit(function() {
-								alert("添加评论成功")
+			    		if ($('#qcommentta').val() == "") {
+							alert('评论内容不能为空')
+							return
+						}
+						
+						$('#qcommentform').ajaxSubmit(function() {
+								var now = new Date();
+								$('#qcommentcontainer').append(
+				'<div style="margin-bottom:10px;">'+
+						'<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}} 发表评论于 '+ now.format("yyyy-MM-dd hh:mm:ss") +
+						'<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">'+$('#qcommentta').val()+
+						'</div></div>');
 							});
+							alert("添加评论成功")
 							return false;
 						}
 			    </script>
+			    <script src="{{StaticUrl "js/utils.js"}}"></script>
 			    </div>
 					{{end}}
 				</div>
 				<div class="topsplit" style="padding-top:10px;margin-bottom:10px">
 					{{if IsLogedIn}}<a id="showAnswers" href="javascript:void(0);">{{end}}
 				{{range .T.answers}}
-					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.LoginName}}"/>
+					<img src="{{.Creator.Avatar}}?s=16" title="{{.Creator.UserName}}"/>
 				{{end}}
 				共 {{.Exercise.NumAnswers}} 人完成此题目
 				{{if IsLogedIn}}{{else}}，提交您的答案后可查看其他答案{{end}}。
@@ -86,6 +112,12 @@
 										}
 									})
 								}
+								function delacomment(id) {
+				    	$.get("{{$basePath}}exercise/delAComment?id="+id, function() {
+				    			alert("删除成功！");
+				    			$('#acomment'+id).remove();
+				    	});
+				    }
 								</script>
 						{{range .T.answers}}
 						<div class="topsplit">
@@ -95,35 +127,35 @@
 									<tr><td>
 										<div class="text-center">
 								<h4><a href="javascript:void(0);" onclick="up(this, {{.Id}});">{{.NumUps}}</a></h4>
-
 							</div>
 							</td></tr>
 							</table>
 							</div>
 						<div class="span8">
 							<img src="{{.Creator.Avatar}}?s=16"/>
-							{{.Creator.LoginName}} 回答于 {{FormatDate .Created "2006-01-02 03:04:05"}}
-							<div  id="a{{.Id}}">
+							{{.Creator.UserName}} 回答于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+							<div id="a{{.Id}}">
 							</div>
+							<div id="acommentcontainer{{.Id}}">
 							{{with $x := index $t.acomments .Id}}
 						{{range $x}}
-						<div style="margin-bottom:10px;">
-						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 发表评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+						<div id="acomment{{.Id}}" style="margin-bottom:10px;padding-left:30px;">
+						<img src="{{.Creator.Avatar}}?s=16"/> {{.Creator.UserName}} 评论于 {{FormatDate .Created "2006-01-02 03:04:05"}}
+						{{if Eq $userId .Creator.Id}}<a href="javascript:void(0);" onclick="delacomment({{.Id}});" class="btn btn-mini">&times;</a>
+						{{end}}
 						<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">
 						{{.Content}}
 						</div>
 					</div>
 						{{end}}
 						{{end}}
-						<div style="padding-left:30px;margin-top:10px;margin-bottom:10px;">
-							<a href="javascript:$('#acomment{{.Id}}').toggle();void(0);" class="btn">添加评论</a>
-						</div>
-						<div id="acomment{{.Id}}" style="padding-left:30px;display:none">
+					</div>
+						<div style="padding-left:30px;">
     <form id="acommentform{{.Id}}" method="post" action="{{$basePath}}exercise/addAComment">
     	{{XsrfFormHtml}}
     	<input type="hidden" name="aComment.answerId" value="{{.Id}}"/>
-    	<textarea name="aComment.content" class="span6" rows="3" placehoder="请在此输入评论"></textarea><br/>
-    	<a href="javascript:void(0);" onclick="addacomment({{.Id}});" class="btn">保存</a>
+    	<textarea id="acommentta{{.Id}}" name="aComment.content" class="span6" rows="2" placehoder="请在此输入评论"></textarea><br/>
+    	<a href="javascript:void(0);" onclick="addacomment({{.Id}});" class="btn">提交评论</a>
     </form>
     </div>
 						</div>
@@ -131,7 +163,18 @@
 					</div>
 					<script>
 			    	function addacomment(id) {
+			    		if ($('#acommentta'+id).val() == "") {
+							alert('评论内容不能为空')
+							return
+						}
+
 							$('#acommentform'+id).ajaxSubmit(function() {
+								var now = new Date();
+								$('#acommentcontainer'+id).append(
+				'<div style="margin-bottom:10px;padding-left:30px;">'+
+						'<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}} 发表评论于 '+ now.format("yyyy-MM-dd hh:mm:ss") +
+						'<div style="padding:5px;border:1px dotted rgb(229, 229, 229)">'+$('#acommentta'+id).val()+
+						'</div></div>');
 								alert("添加评论成功")
 							});
 							return false;
@@ -177,7 +220,7 @@
 		<script>
 		$(function(){
 			{{if IsLogedIn}}
-			$('#answers').hide()
+			//$('#answers').hide()
 			$('#showAnswers').click(function(){
 				$('#answers').toggle()
 			})
@@ -243,7 +286,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range $idx, $user := .T.qusers}}
-			<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{$user.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.LoginName}}</a> 出题 {{$user.NumQuestions}} 道</li>
+			<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{$user.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.UserName}}</a> 出题 {{$user.NumQuestions}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>
@@ -256,7 +299,7 @@
 				<tr><td>
 					<ul class="unstyled" style="min-height:100px;">
 				{{range $idx, $user := .T.eusers}}
-				<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.LoginName}}</a> 做题 {{.NumExercises}} 道</li>
+				<li><span class="badge badge-{{getBadge $idx}}">{{Add $idx 1}}</span>&nbsp; <img src="{{.Avatar}}?s=16"/>&nbsp; <a href="{{$basePath}}{{$user.LoginName}}">{{$user.UserName}}</a> 做题 {{.NumExercises}} 道</li>
 			{{end}}</ul></td></tr>
 			</tbody>
 		</table>

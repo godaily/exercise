@@ -3,6 +3,7 @@ package actions
 import (
 	"time"
 
+	"errors"
 	. "github.com/lunny/play-sdk"
 	. "github.com/lunny/xweb"
 )
@@ -12,10 +13,13 @@ type ExerciseAction struct {
 
 	root        Mapper `xweb:"/"`
 	add         Mapper
+	edit        Mapper
 	sub         Mapper
 	compile     Mapper
 	addQComment Mapper `xweb:"POST"`
+	delQComment Mapper
 	addAComment Mapper `xweb:"POST"`
+	delAComment Mapper
 	upAnswer    Mapper
 
 	Exercise Question
@@ -91,8 +95,9 @@ func (c *ExerciseAction) Add() error {
 		}
 		return err
 	} else if c.Method() == "POST" {
-		c.Exercise.Creator.Id = c.BaseAction.GetLoginUserId()
+		c.Exercise.Creator.Id = c.GetLoginUserId()
 		c.Exercise.Created = time.Now()
+		c.Exercise.LastUpdated = time.Now()
 		c.Exercise.Type = EXERCISE_MODULE
 		session := Orm.NewSession()
 		defer session.Close()
@@ -111,6 +116,40 @@ func (c *ExerciseAction) Add() error {
 		}
 		if err != nil {
 			session.Rollback()
+		}
+		return err
+	}
+	return NotSupported()
+}
+
+func (c *ExerciseAction) Edit() error {
+	if c.Method() == "GET" {
+		if c.Id > 0 {
+			has, err := Orm.Id(c.Id).Get(&c.Exercise)
+			if err != nil {
+				return err
+			}
+			if has {
+				if c.Exercise.Creator.Id != c.GetLoginUserId() {
+					return c.Go("root")
+				}
+				recentExercises := make([]Question, 0)
+				err := Orm.OrderBy("created desc").Limit(5).Find(&recentExercises)
+				if err == nil {
+					return c.Render("exercise/edit.html", &T{
+						"exercises": &recentExercises,
+					})
+				}
+				return err
+			}
+		}
+
+		return errors.New("参数错误")
+	} else if c.Method() == "POST" {
+		c.Exercise.LastUpdated = time.Now()
+		_, err := Orm.Id(c.Exercise.Id).Update(&c.Exercise)
+		if err == nil {
+			return c.Render("exercise/editok.html")
 		}
 		return err
 	}
@@ -272,6 +311,20 @@ func (c *ExerciseAction) AddQComment() {
 	}
 }
 
+func (c *ExerciseAction) DelQComment() {
+	if c.Id > 0 {
+		q := &QuestionComment{Creator: User{Id: c.GetLoginUserId()}}
+		_, err := Orm.Id(c.Id).Delete(q)
+		if err == nil {
+			c.ServeJson(map[string]interface{}{"error": ""})
+		} else {
+			c.ServeJson(map[string]interface{}{"error": err.Error()})
+		}
+	} else {
+		c.ServeJson(map[string]interface{}{"error": "参数不正确"})
+	}
+}
+
 func (c *ExerciseAction) AddAComment() {
 	var err error
 	if c.Id == 0 {
@@ -287,5 +340,19 @@ func (c *ExerciseAction) AddAComment() {
 		c.ServeJson(map[string]interface{}{"error": ""})
 	} else {
 		c.ServeJson(map[string]interface{}{"error": err.Error()})
+	}
+}
+
+func (c *ExerciseAction) DelAComment() {
+	if c.Id > 0 {
+		a := &AnswerComment{Creator: User{Id: c.GetLoginUserId()}}
+		_, err := Orm.Id(c.Id).Delete(a)
+		if err == nil {
+			c.ServeJson(map[string]interface{}{"error": ""})
+		} else {
+			c.ServeJson(map[string]interface{}{"error": err.Error()})
+		}
+	} else {
+		c.ServeJson(map[string]interface{}{"error": "参数不正确"})
 	}
 }

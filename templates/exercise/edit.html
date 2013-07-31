@@ -1,0 +1,37 @@
+{{include "head.html"}}
+<div class="container">
+<div class="row frame">
+<div class="span9">
+	<form method="post">
+		{{XsrfFormHtml}}
+		<input type="hidden" name="exercise.id" value="{{.Exercise.Id}}"/>
+	<input type="text" name="exercise.title" class="span9" placeholder="输入练习的标题" value="{{.Exercise.Title}}"/>
+	<textarea class="ckeditor" placeholder="输入练习的具体内容" name="exercise.content" id="content">{{.Exercise.Content}}</textarea>
+	<script>
+			CKEDITOR.replace( 'content' );
+		</script>
+	<p>
+	<input type="submit" class="btn btn-primary btn-large" value="保存"/>
+	</p>
+</form>
+</div>
+<div class="span3 last">
+	<div>
+			<table class="table table-bordered" style="min-height:200px;">
+			<thead><tr><td><div class="text-center">最近添加</div></td></tr></thead>
+			<tbody>
+				<tr><td>
+					<ul style="min-height:100px;">
+						{{$basePath := .App.BasePath}}
+				{{range .T.exercises}}
+					<li><a href="{{$basePath}}exercise/?id={{.Id}}">{{.Title}}</a></li>
+				{{end}}
+			</ul></td></tr>
+			</tbody>
+		</table>
+		</div>
+</div>
+</div>
+</div>
+<script src="{{StaticUrl "ckeditor/ckeditor.js"}}"></script>
+{{include "footer.html"}}
