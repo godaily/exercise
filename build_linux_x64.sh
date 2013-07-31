@@ -1,4 +1,11 @@
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
-rm main_linux_x64
-mv main main_linux_x64
-chmod +x main_linux_x64
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build setup.go
+rm -rf output
+mkdir output
+chmod +x main
+mv main output/godaily
+mv setup output/
+cp config.ini output/
+cp createdb.sql output/
+cp -r static output/
+cp -r templates output/
