@@ -46,13 +46,16 @@ func main() {
 	// add login filter
 	app := MainServer().RootApp
 	loginFilter := NewLoginFilter(app, actions.USER_ID_TAG, "/login")
-	loginFilter.AddAskLoginUrls("/exercise/add", "/exercise/sub")
+	loginFilter.AddAnonymousUrls("/", "/exercise/", "/exercise/compile",
+		"/login", "/about")
 	app.AddFilter(loginFilter)
 
 	// add func app scope
 	app.AddFunc("AppVer", func() string {
 		return "v" + APP_VER
 	})
+
+	app.SetConfig("Orm", actions.Orm)
 
 	// run the web server
 	Run(fmt.Sprintf("%v:%v", cfgs["address"], cfgs["port"]))

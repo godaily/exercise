@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"github.com/lunny/xorm"
 	"github.com/lunny/xweb"
 )
 
@@ -13,6 +14,10 @@ func (c *BaseAction) Init() {
 	c.AddFunc("GetLoginUserAvatar", c.GetLoginUserAvatar)
 	c.AddFunc("GetLoginUserName", c.GetLoginUserName)
 	c.AddFunc("GetLoginUserId", c.GetLoginUserId)
+}
+
+func (c *BaseAction) Orm() *xorm.Engine {
+	return c.App.GetConfig("Orm").(*xorm.Engine)
 }
 
 func (c *BaseAction) IsLogedIn() bool {

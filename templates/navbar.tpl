@@ -13,6 +13,7 @@
 		    <div class="pull-right">
 		        <ul class="nav">
 		        	{{if IsLogedIn}}
+		        	<li><a href="{{.App.BasePath}}setttings/pass">设置</a></li>
 		        	<li>
 		        		<a href="{{.App.BasePath}}{{GetLoginUserName}}">
 		        			<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}}</a></li>
