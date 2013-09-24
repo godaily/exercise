@@ -1,14 +1,8 @@
 package actions
 
 import (
-	. "github.com/lunny/xorm"
 	"github.com/lunny/xweb"
 	"regexp"
-)
-
-var (
-	Orm    *Engine
-	AppVer string
 )
 
 type HomeAction struct {
@@ -107,7 +101,7 @@ func (c *HomeAction) Register() error {
 
 		c.User.EncodePasswd()
 		c.User.BuildAvatar()
-		_, err = Orm.Insert(&c.User)
+		_, err = c.Orm().Insert(&c.User)
 		if err == nil {
 			return c.Render("registerok.html")
 		}

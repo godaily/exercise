@@ -67,8 +67,8 @@ type Question struct {
 	NumAnswers   int
 	NumReads     int
 	NumUps       int
-	Created      time.Time `xorm:"not null"`
-	LastUpdated  time.Time `xorm:"not null"`
+	Created      time.Time `xorm:"not null created"`
+	LastUpdated  time.Time `xorm:"not null updated"`
 }
 
 type QuestionFollow struct {
@@ -82,8 +82,8 @@ type QuestionComment struct {
 	QuestionId  int64     `xorm:"index"`
 	Creator     User      `xorm:"index creator_id int(11)"`
 	Content     string    `xorm:"text not null"`
-	Created     time.Time `xorm:"not null"`
-	LastUpdated time.Time `xorm:"not null"`
+	Created     time.Time `xorm:"not null created"`
+	LastUpdated time.Time `xorm:"not null updated"`
 }
 
 type Answer struct {
@@ -91,8 +91,8 @@ type Answer struct {
 	QuestionId  int64     `xorm:"index"`
 	Creator     User      `xorm:"index creator_id int(11)"`
 	Content     string    `xorm:"text not null"`
-	Created     time.Time `xorm:"not null"`
-	LastUpdated time.Time `xorm:"not null"`
+	Created     time.Time `xorm:"not null created"`
+	LastUpdated time.Time `xorm:"not null updated"`
 	NumComments int
 	NumUps      int
 }
@@ -108,8 +108,8 @@ type AnswerComment struct {
 	AnswerId    int64     `xorm:"index"`
 	Creator     User      `xorm:"index creator_id int(11)"`
 	Content     string    `xorm:"text not null"`
-	Created     time.Time `xorm:"not null"`
-	LastUpdated time.Time `xorm:"not null"`
+	Created     time.Time `xorm:"not null created"`
+	LastUpdated time.Time `xorm:"not null updated"`
 }
 
 type Tag struct {

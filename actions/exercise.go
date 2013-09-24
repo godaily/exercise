@@ -5,22 +5,22 @@ import (
 
 	"errors"
 	. "github.com/lunny/play-sdk"
-	. "github.com/lunny/xweb"
+	"github.com/lunny/xweb"
 )
 
 type ExerciseAction struct {
 	BaseAction
 
-	root        Mapper `xweb:"/"`
-	add         Mapper
-	edit        Mapper
-	sub         Mapper
-	compile     Mapper
-	addQComment Mapper `xweb:"POST"`
-	delQComment Mapper
-	addAComment Mapper `xweb:"POST"`
-	delAComment Mapper
-	upAnswer    Mapper
+	root        xweb.Mapper `xweb:"/"`
+	add         xweb.Mapper
+	edit        xweb.Mapper
+	sub         xweb.Mapper
+	compile     xweb.Mapper
+	addQComment xweb.Mapper `xweb:"POST"`
+	delQComment xweb.Mapper
+	addAComment xweb.Mapper `xweb:"POST"`
+	delAComment xweb.Mapper
+	upAnswer    xweb.Mapper
 
 	Exercise Question
 	Answer   Answer
@@ -61,7 +61,15 @@ func (c *ExerciseAction) UpAnswer() {
 					_, err = session.Insert(au)
 				}
 				if err == nil {
-					_, err = session.Exec("update answer set num_ups=num_ups+1 where id = ?", c.Id)
+					answer := new(Answer)
+					has, err = session.Id(c.Id).Get(answer)
+					if err == nil {
+						if has {
+							_, err = session.Table(answer).Id(c.Id).Update(map[string]interface{}{"num_ups": answer.NumUps + 1})
+						} else {
+							err = errors.New("answer is not exist.")
+						}
+					}
 				}
 				if err != nil {
 					session.Rollback()
@@ -87,25 +95,31 @@ func (c *ExerciseAction) UpAnswer() {
 func (c *ExerciseAction) Add() error {
 	if c.Method() == "GET" {
 		recentExercises := make([]Question, 0)
-		err := Orm.OrderBy("created desc").Limit(5).Find(&recentExercises)
+		err := Orm.Desc("created").Limit(5).Find(&recentExercises)
 		if err == nil {
-			return c.Render("exercise/add.html", &T{
+			return c.Render("exercise/add.html", &xweb.T{
 				"exercises": &recentExercises,
 			})
 		}
 		return err
 	} else if c.Method() == "POST" {
 		c.Exercise.Creator.Id = c.GetLoginUserId()
-		c.Exercise.Created = time.Now()
-		c.Exercise.LastUpdated = time.Now()
 		c.Exercise.Type = EXERCISE_MODULE
-		session := Orm.NewSession()
+		session := c.Orm().NewSession()
 		defer session.Close()
 		err := session.Begin()
 		if err == nil {
 			_, err = session.Insert(&c.Exercise)
 			if err == nil {
-				_, err = session.Exec("update user set num_questions = num_questions+1 where id = ?", c.GetLoginUserId())
+				user := new(User)
+				has, err := session.Id(c.GetLoginUserId()).Get(user)
+				if err == nil {
+					if has {
+						session.Table(user).Id(c.GetLoginUserId()).Update(map[string]interface{}{"num_questions": user.NumQuestions + 1})
+					} else {
+						err = errors.New("user is not exist.")
+					}
+				}
 				if err == nil {
 					err = session.Commit()
 				}
@@ -119,7 +133,7 @@ func (c *ExerciseAction) Add() error {
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
 
 func (c *ExerciseAction) Edit() error {
@@ -136,7 +150,7 @@ func (c *ExerciseAction) Edit() error {
 				recentExercises := make([]Question, 0)
 				err := Orm.OrderBy("created desc").Limit(5).Find(&recentExercises)
 				if err == nil {
-					return c.Render("exercise/edit.html", &T{
+					return c.Render("exercise/edit.html", &xweb.T{
 						"exercises": &recentExercises,
 					})
 				}
@@ -146,14 +160,13 @@ func (c *ExerciseAction) Edit() error {
 
 		return errors.New("参数错误")
 	} else if c.Method() == "POST" {
-		c.Exercise.LastUpdated = time.Now()
 		_, err := Orm.Id(c.Exercise.Id).Update(&c.Exercise)
 		if err == nil {
 			return c.Render("exercise/editok.html")
 		}
 		return err
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
 
 func (c *ExerciseAction) Compile() {
@@ -176,17 +189,31 @@ func (c *ExerciseAction) Sub() error {
 		if c.Answer.Id == 0 {
 			session := Orm.NewSession()
 			defer session.Close()
-			c.Answer.Created = time.Now()
-			c.Answer.LastUpdated = c.Answer.Created
 			c.Answer.Creator.Id = c.GetLoginUserId()
 			err := session.Begin()
 			if err == nil {
 				_, err = session.Insert(&c.Answer)
 				if err == nil {
-					_, err = session.Exec("update user set num_exercises=num_exercises+1 where id=?", c.GetLoginUserId())
+					user := new(User)
+					has, err := session.Id(c.GetLoginUserId()).Get(user)
+					if err == nil {
+						if has {
+							_, err = session.Table(user).Id(c.GetLoginUserId()).Update(map[string]interface{}{"num_exercises": user.NumExercises + 1})
+						} else {
+							err = errors.New("user is not exist.")
+						}
+					}
 				}
 				if err == nil {
-					_, err = session.Exec("update question set num_answers=num_answers+1 where id=?", c.Id)
+					question := new(Question)
+					has, err := session.Id(c.Id).Get(question)
+					if err == nil {
+						if has {
+							_, err = session.Table(question).Id(c.Id).Update(map[string]interface{}{"num_answers": question.NumAnswers + 1})
+						} else {
+							err = errors.New("question is not exist.")
+						}
+					}
 				}
 			}
 			if err == nil {
@@ -200,7 +227,6 @@ func (c *ExerciseAction) Sub() error {
 			}
 			return err
 		} else {
-			c.Answer.Created = time.Now()
 			_, err := Orm.Id(c.Answer.Id).Update(&c.Answer)
 			if err == nil {
 				return c.Render("exercise/subok.html")
@@ -208,14 +234,14 @@ func (c *ExerciseAction) Sub() error {
 			return err
 		}
 	}
-	return NotSupported()
+	return xweb.NotSupported()
 }
 
 func (c *ExerciseAction) Root() error {
 	var has bool
 	var err error
 	if c.Id == 0 {
-		has, err = Orm.OrderBy("created desc").Get(&c.Exercise)
+		has, err = Orm.Desc("created").Get(&c.Exercise)
 	} else {
 		has, err = Orm.Id(c.Id).Get(&c.Exercise)
 	}
@@ -229,41 +255,41 @@ func (c *ExerciseAction) Root() error {
 		var qcomments []QuestionComment
 		var acomments map[int64][]AnswerComment = make(map[int64][]AnswerComment)
 		if has {
-			_, err = Orm.OrderBy("id desc").Where("id < ?", c.Exercise.Id).Get(&pre)
+			_, err = Orm.Desc("id").Where("id < ?", c.Exercise.Id).Get(&pre)
 			if err != nil {
 				return err
 			}
 			preId = int(pre.Id)
-			_, err = Orm.OrderBy("id asc").Where("id > ?", c.Exercise.Id).Get(&last)
+			_, err = Orm.Asc("id").Where("id > ?", c.Exercise.Id).Get(&last)
 			if err != nil {
 				return err
 			}
 
-			err = Orm.OrderBy("created asc").Find(&qcomments, &QuestionComment{QuestionId: c.Exercise.Id})
+			err = Orm.Asc("created").Find(&qcomments, &QuestionComment{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
 
 			lastId = int(last.Id)
-			err = Orm.OrderBy("num_ups desc").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
+			err = Orm.Desc("num_ups").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
 
 			for _, answer := range answers {
 				var ac []AnswerComment
-				err = Orm.OrderBy("created asc").Find(&ac, &AnswerComment{AnswerId: answer.Id})
+				err = Orm.Asc("created").Find(&ac, &AnswerComment{AnswerId: answer.Id})
 				if err != nil {
 					return err
 				}
 				acomments[answer.Id] = ac
 			}
 
-			err = Orm.OrderBy("num_questions desc").Limit(5).Find(&qusers)
+			err = Orm.Desc("num_questions").Limit(5).Find(&qusers)
 			if err != nil {
 				return err
 			}
-			err = Orm.OrderBy("num_exercises desc").Limit(5).Find(&eusers)
+			err = Orm.Desc("num_exercises").Limit(5).Find(&eusers)
 			if err != nil {
 				return err
 			}
@@ -276,7 +302,7 @@ func (c *ExerciseAction) Root() error {
 				}
 			}
 		}
-		return c.Render("exercise/root.html", &T{
+		return c.Render("exercise/root.html", &xweb.T{
 			"has":         has,
 			"preId":       preId,
 			"lastId":      lastId,
@@ -296,12 +322,8 @@ func (c *ExerciseAction) AddQComment() {
 	var err error
 	if c.Id == 0 {
 		c.QComment.Creator.Id = c.GetLoginUserId()
-		c.QComment.Created = time.Now()
-		c.QComment.LastUpdated = time.Now()
 		_, err = Orm.Insert(&c.QComment)
-
 	} else {
-		c.QComment.LastUpdated = time.Now()
 		_, err = Orm.Id(c.QComment.Id).Update(&c.QComment)
 	}
 	if err == nil {
@@ -329,11 +351,8 @@ func (c *ExerciseAction) AddAComment() {
 	var err error
 	if c.Id == 0 {
 		c.AComment.Creator.Id = c.GetLoginUserId()
-		c.AComment.Created = time.Now()
-		c.AComment.LastUpdated = time.Now()
 		_, err = Orm.Insert(&c.AComment)
 	} else {
-		c.AComment.LastUpdated = time.Now()
 		_, err = Orm.Id(c.AComment.Id).Update(&c.AComment)
 	}
 	if err == nil {

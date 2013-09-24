@@ -12,11 +12,6 @@ import (
 
 const APP_VER = "0.0.1 Beta"
 
-func init() {
-	// Setting application version.
-	//actions.AppVer = "v" + APP_VER
-}
-
 func main() {
 	// load config
 	var err error
@@ -36,6 +31,10 @@ func main() {
 		return
 	}
 	actions.Orm.ShowSQL = true
+	actions.Orm.ShowDebug = true
+
+	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
+	actions.Orm.SetDefaultCacher(cacher)
 
 	// add actions
 	xweb.AddAction(&actions.HomeAction{})
@@ -47,7 +46,7 @@ func main() {
 	app := xweb.MainServer().RootApp
 	loginFilter := xweb.NewLoginFilter(app, actions.USER_ID_TAG, "/login")
 	loginFilter.AddAnonymousUrls("/", "/exercise/", "/exercise/compile",
-		"/login", "/about")
+		"/login", "/about", "/register")
 	app.AddFilter(loginFilter)
 
 	// add func app scope

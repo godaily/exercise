@@ -4,13 +4,13 @@ import (
 	. "./actions"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	. "github.com/lunny/xorm"
-	. "github.com/lunny/xweb"
+	"github.com/lunny/xorm"
+	"github.com/lunny/xweb"
 	"io/ioutil"
 )
 
 var (
-	engine *Engine
+	engine *xorm.Engine
 )
 
 func main() {
@@ -21,8 +21,8 @@ func main() {
 		return
 	}
 
-	cfgs := SimpleParse(string(data))
-	engine, err = NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
+	cfgs := xweb.SimpleParse(string(data))
+	engine, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		cfgs["dbuser"], cfgs["dbpasswd"], cfgs["dbhost"], cfgs["dbname"]))
 	if err != nil {
 		fmt.Println("Fail to connect to database:", err)

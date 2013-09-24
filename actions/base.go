@@ -5,6 +5,11 @@ import (
 	"github.com/lunny/xweb"
 )
 
+var (
+	Orm    *xorm.Engine
+	AppVer string
+)
+
 type BaseAction struct {
 	xweb.Action
 }
