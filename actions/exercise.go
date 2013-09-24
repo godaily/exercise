@@ -1,11 +1,11 @@
 package actions
 
 import (
-	"time"
-
 	"errors"
+	"fmt"
 	. "github.com/lunny/play-sdk"
 	"github.com/lunny/xweb"
+	"time"
 )
 
 type ExerciseAction struct {
@@ -15,12 +15,12 @@ type ExerciseAction struct {
 	add         xweb.Mapper
 	edit        xweb.Mapper
 	sub         xweb.Mapper
-	compile     xweb.Mapper
 	addQComment xweb.Mapper `xweb:"POST"`
 	delQComment xweb.Mapper
 	addAComment xweb.Mapper `xweb:"POST"`
 	delAComment xweb.Mapper
 	upAnswer    xweb.Mapper
+	compile     xweb.Mapper
 
 	Exercise Question
 	Answer   Answer
@@ -170,6 +170,7 @@ func (c *ExerciseAction) Edit() error {
 }
 
 func (c *ExerciseAction) Compile() {
+	fmt.Println(c.Answer.Content)
 	res, err := Compile(c.Answer.Content)
 	if err == nil {
 		if res.Errors == "" {

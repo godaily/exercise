@@ -230,30 +230,34 @@
 					$('#message').text("内容不能为空 ...")
 					return
 				}
-				$('#btnCompile').click(function(){})
-				$('#btnCompile').addClass('disabled')
-				$('#btnSubmit').addClass('disabled')
-				$('#message').text("compiling ...")
+				if ($('#btnCompile').hasClass('disabled')) {
+					return
+				}
+				//$('#btnCompile').click(function(){})
+					$('#btnCompile').addClass('disabled')
+					$('#btnSubmit').addClass('disabled')
+					$('#message').text("compiling ...")
 
-				$.post("{{.App.BasePath}}exercise/compile", 
-					{"answer.content":editor.getValue()}, function(data, statusText, jqXHR){
-						if (statusText == "success") {
-							if ("errors" in data) {
-								$('#message').text(data['errors']);
-							} else {
-								text = ""
-								for (var a in data) {
-									text += data[a]["Message"]+"\n"
+					$.post("{{.App.BasePath}}exercise/compile", 
+						{"{{XsrfName}}": "{{XsrfValue}}",
+							"answer.content":editor.getValue()}, function(data, statusText, jqXHR){
+							if (statusText == "success") {
+								if ("errors" in data) {
+									$('#message').text(data['errors']);
+								} else {
+									text = ""
+									for (var a in data) {
+										text += data[a]["Message"]+"\n"
+									}
+									$('#message').text(text);
 								}
-								$('#message').text(text);
+							} else {
+								$('#message').text("request error "+statusText)
 							}
-						} else {
-							$('#message').text("request error "+statusText)
+							$('#btnCompile').removeClass('disabled')
+							$('#btnSubmit').removeClass('disabled')
 						}
-						$('#btnCompile').removeClass('disabled')
-						$('#btnSubmit').removeClass('disabled')
-					}
-				)
+					)
 			});
 		});
 		</script>
