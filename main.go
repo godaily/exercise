@@ -8,9 +8,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
 	"github.com/lunny/xweb"
+	//"xorm"
 )
 
-const APP_VER = "0.0.1 Beta"
+const APP_VER = "0.0.2 Beta"
 
 func main() {
 	// load config
@@ -30,8 +31,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	actions.Orm.ShowSQL = true
-	actions.Orm.ShowDebug = true
+	//actions.Orm.ShowSQL = true
+	//actions.Orm.ShowDebug = true
 
 	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
 	actions.Orm.SetDefaultCacher(cacher)

@@ -15,8 +15,8 @@
 		        	{{if IsLogedIn}}
 		        	<li><a href="{{.App.BasePath}}setttings/pass">设置</a></li>
 		        	<li>
-		        		<a href="{{.App.BasePath}}{{GetLoginUserName}}">
-		        			<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}}</a></li>
+		        		<!--<a href="{{.App.BasePath}}{{GetLoginUserName}}">-->
+		        			<img src="{{GetLoginUserAvatar}}?s=16"/> {{GetLoginUserName}}<!--</a>--></li>
 		        			<li>
 		        		<a href="{{.App.BasePath}}logout">退出</a>
 		        		</li>

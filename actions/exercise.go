@@ -65,7 +65,8 @@ func (c *ExerciseAction) UpAnswer() {
 					has, err = session.Id(c.Id).Get(answer)
 					if err == nil {
 						if has {
-							_, err = session.Table(answer).Id(c.Id).Update(map[string]interface{}{"num_ups": answer.NumUps + 1})
+							answer.NumUps += 1
+							_, err = session.Cols("num_ups").Id(c.Id).Update(answer)
 						} else {
 							err = errors.New("answer is not exist.")
 						}
@@ -111,15 +112,18 @@ func (c *ExerciseAction) Add() error {
 		if err == nil {
 			_, err = session.Insert(&c.Exercise)
 			if err == nil {
-				user := new(User)
+				/*user := new(User)
 				has, err := session.Id(c.GetLoginUserId()).Get(user)
 				if err == nil {
 					if has {
-						session.Table(user).Id(c.GetLoginUserId()).Update(map[string]interface{}{"num_questions": user.NumQuestions + 1})
+						user.NumQuestions += 1
+						_, err = session.Cols("num_questions").Id(c.GetLoginUserId()).Update(user)
 					} else {
 						err = errors.New("user is not exist.")
 					}
-				}
+				}*/
+				_, err = session.Exec("update user set num_questions=num_questions+1 where id = ?", c.GetLoginUserId())
+				session.Engine.ClearCacheBean(new(User), c.GetLoginUserId())
 				if err == nil {
 					err = session.Commit()
 				}
@@ -148,7 +152,7 @@ func (c *ExerciseAction) Edit() error {
 					return c.Go("root")
 				}
 				recentExercises := make([]Question, 0)
-				err := Orm.OrderBy("created desc").Limit(5).Find(&recentExercises)
+				err := Orm.Desc("created").Limit(5).Find(&recentExercises)
 				if err == nil {
 					return c.Render("exercise/edit.html", &xweb.T{
 						"exercises": &recentExercises,
