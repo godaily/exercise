@@ -44,7 +44,7 @@ func (c *HomeAction) Login() error {
 			return c.Go("login?message=登录名不能为空")
 		}
 		c.User.EncodePasswd()
-		has, err := Orm.Get(&c.User)
+		has, err := c.Orm.Get(&c.User)
 		if err == nil {
 			if has {
 				c.SetSession(USER_ID_TAG, c.User.Id)
@@ -90,7 +90,7 @@ func (c *HomeAction) Register() error {
 			return c.Go("register?message=两次密码不匹配")
 		}
 		u := &User{}
-		has, err := Orm.Sql("select * from user where login_name=? or email =?",
+		has, err := c.Orm.Sql("select * from user where login_name=? or email =?",
 			c.User.LoginName, c.User.Email).Get(u)
 		if has {
 			return c.Go("register?message=登录名或者email地址重复")
@@ -101,7 +101,7 @@ func (c *HomeAction) Register() error {
 
 		c.User.EncodePasswd()
 		c.User.BuildAvatar()
-		_, err = c.Orm().Insert(&c.User)
+		_, err = c.Orm.Insert(&c.User)
 		if err == nil {
 			return c.Render("registerok.html")
 		}

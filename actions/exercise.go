@@ -43,17 +43,18 @@ func GetBadge(i int) string {
 
 func (c *ExerciseAction) Init() {
 	c.BaseAction.Init()
-	c.AddFunc("getBadge", GetBadge)
-	c.AddVar("IsExer", true)
+	c.AddTmplVars(&xweb.T{"getBadge": GetBadge,
+		"IsExer": true,
+	})
 }
 
 func (c *ExerciseAction) UpAnswer() {
 	if c.Id > 0 {
 		au := &AnswerUp{AnswerId: c.Id, UserId: c.GetLoginUserId()}
-		has, err := Orm.Get(au)
+		has, err := c.Orm.Get(au)
 		if err == nil {
 			if !has {
-				session := Orm.NewSession()
+				session := c.Orm.NewSession()
 				defer session.Close()
 				err = session.Begin()
 				if err == nil {
@@ -96,7 +97,7 @@ func (c *ExerciseAction) UpAnswer() {
 func (c *ExerciseAction) Add() error {
 	if c.Method() == "GET" {
 		recentExercises := make([]Question, 0)
-		err := Orm.Desc("created").Limit(5).Find(&recentExercises)
+		err := c.Orm.Desc("created").Limit(5).Find(&recentExercises)
 		if err == nil {
 			return c.Render("exercise/add.html", &xweb.T{
 				"exercises": &recentExercises,
@@ -106,22 +107,12 @@ func (c *ExerciseAction) Add() error {
 	} else if c.Method() == "POST" {
 		c.Exercise.Creator.Id = c.GetLoginUserId()
 		c.Exercise.Type = EXERCISE_MODULE
-		session := c.Orm().NewSession()
+		session := c.Orm.NewSession()
 		defer session.Close()
 		err := session.Begin()
 		if err == nil {
 			_, err = session.Insert(&c.Exercise)
 			if err == nil {
-				/*user := new(User)
-				has, err := session.Id(c.GetLoginUserId()).Get(user)
-				if err == nil {
-					if has {
-						user.NumQuestions += 1
-						_, err = session.Cols("num_questions").Id(c.GetLoginUserId()).Update(user)
-					} else {
-						err = errors.New("user is not exist.")
-					}
-				}*/
 				_, err = session.Exec("update user set num_questions=num_questions+1 where id = ?", c.GetLoginUserId())
 				session.Engine.ClearCacheBean(new(User), c.GetLoginUserId())
 				if err == nil {
@@ -143,7 +134,7 @@ func (c *ExerciseAction) Add() error {
 func (c *ExerciseAction) Edit() error {
 	if c.Method() == "GET" {
 		if c.Id > 0 {
-			has, err := Orm.Id(c.Id).Get(&c.Exercise)
+			has, err := c.Orm.Id(c.Id).Get(&c.Exercise)
 			if err != nil {
 				return err
 			}
@@ -152,7 +143,7 @@ func (c *ExerciseAction) Edit() error {
 					return c.Go("root")
 				}
 				recentExercises := make([]Question, 0)
-				err := Orm.Desc("created").Limit(5).Find(&recentExercises)
+				err := c.Orm.Desc("created").Limit(5).Find(&recentExercises)
 				if err == nil {
 					return c.Render("exercise/edit.html", &xweb.T{
 						"exercises": &recentExercises,
@@ -164,7 +155,7 @@ func (c *ExerciseAction) Edit() error {
 
 		return errors.New("参数错误")
 	} else if c.Method() == "POST" {
-		_, err := Orm.Id(c.Exercise.Id).Update(&c.Exercise)
+		_, err := c.Orm.Id(c.Exercise.Id).Update(&c.Exercise)
 		if err == nil {
 			return c.Render("exercise/editok.html")
 		}
@@ -192,7 +183,7 @@ func (c *ExerciseAction) Sub() error {
 		return c.Render("exercise/sub.html")
 	} else if c.Method() == "POST" {
 		if c.Answer.Id == 0 {
-			session := Orm.NewSession()
+			session := c.Orm.NewSession()
 			defer session.Close()
 			c.Answer.Creator.Id = c.GetLoginUserId()
 			err := session.Begin()
@@ -232,7 +223,7 @@ func (c *ExerciseAction) Sub() error {
 			}
 			return err
 		} else {
-			_, err := Orm.Id(c.Answer.Id).Update(&c.Answer)
+			_, err := c.Orm.Id(c.Answer.Id).Update(&c.Answer)
 			if err == nil {
 				return c.Render("exercise/subok.html")
 			}
@@ -246,9 +237,9 @@ func (c *ExerciseAction) Root() error {
 	var has bool
 	var err error
 	if c.Id == 0 {
-		has, err = Orm.Desc("created").Get(&c.Exercise)
+		has, err = c.Orm.Desc("created").Get(&c.Exercise)
 	} else {
-		has, err = Orm.Id(c.Id).Get(&c.Exercise)
+		has, err = c.Orm.Id(c.Id).Get(&c.Exercise)
 	}
 	if err == nil {
 		var answers []Answer
@@ -260,48 +251,48 @@ func (c *ExerciseAction) Root() error {
 		var qcomments []QuestionComment
 		var acomments map[int64][]AnswerComment = make(map[int64][]AnswerComment)
 		if has {
-			_, err = Orm.Desc("id").Where("id < ?", c.Exercise.Id).Get(&pre)
+			_, err = c.Orm.Desc("id").Where("id < ?", c.Exercise.Id).Get(&pre)
 			if err != nil {
 				return err
 			}
 			preId = int(pre.Id)
-			_, err = Orm.Asc("id").Where("id > ?", c.Exercise.Id).Get(&last)
+			_, err = c.Orm.Asc("id").Where("id > ?", c.Exercise.Id).Get(&last)
 			if err != nil {
 				return err
 			}
 
-			err = Orm.Asc("created").Find(&qcomments, &QuestionComment{QuestionId: c.Exercise.Id})
+			err = c.Orm.Asc("created").Find(&qcomments, &QuestionComment{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
 
 			lastId = int(last.Id)
-			err = Orm.Desc("num_ups").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
+			err = c.Orm.Desc("num_ups").Find(&answers, &Answer{QuestionId: c.Exercise.Id})
 			if err != nil {
 				return err
 			}
 
 			for _, answer := range answers {
 				var ac []AnswerComment
-				err = Orm.Asc("created").Find(&ac, &AnswerComment{AnswerId: answer.Id})
+				err = c.Orm.Asc("created").Find(&ac, &AnswerComment{AnswerId: answer.Id})
 				if err != nil {
 					return err
 				}
 				acomments[answer.Id] = ac
 			}
 
-			err = Orm.Desc("num_questions").Limit(5).Find(&qusers)
+			err = c.Orm.Desc("num_questions").Limit(5).Find(&qusers)
 			if err != nil {
 				return err
 			}
-			err = Orm.Desc("num_exercises").Limit(5).Find(&eusers)
+			err = c.Orm.Desc("num_exercises").Limit(5).Find(&eusers)
 			if err != nil {
 				return err
 			}
 			if c.IsLogedIn() {
 				curAnswer.Creator.Id = c.GetLoginUserId()
 				curAnswer.QuestionId = c.Exercise.Id
-				hasSubmited, err = Orm.Get(&curAnswer)
+				hasSubmited, err = c.Orm.Get(&curAnswer)
 				if err != nil {
 					return err
 				}
@@ -327,9 +318,9 @@ func (c *ExerciseAction) AddQComment() {
 	var err error
 	if c.Id == 0 {
 		c.QComment.Creator.Id = c.GetLoginUserId()
-		_, err = Orm.Insert(&c.QComment)
+		_, err = c.Orm.Insert(&c.QComment)
 	} else {
-		_, err = Orm.Id(c.QComment.Id).Update(&c.QComment)
+		_, err = c.Orm.Id(c.QComment.Id).Update(&c.QComment)
 	}
 	if err == nil {
 		c.ServeJson(map[string]interface{}{"error": ""})
@@ -341,7 +332,7 @@ func (c *ExerciseAction) AddQComment() {
 func (c *ExerciseAction) DelQComment() {
 	if c.Id > 0 {
 		q := &QuestionComment{Creator: User{Id: c.GetLoginUserId()}}
-		_, err := Orm.Id(c.Id).Delete(q)
+		_, err := c.Orm.Id(c.Id).Delete(q)
 		if err == nil {
 			c.ServeJson(map[string]interface{}{"error": ""})
 		} else {
@@ -356,9 +347,9 @@ func (c *ExerciseAction) AddAComment() {
 	var err error
 	if c.Id == 0 {
 		c.AComment.Creator.Id = c.GetLoginUserId()
-		_, err = Orm.Insert(&c.AComment)
+		_, err = c.Orm.Insert(&c.AComment)
 	} else {
-		_, err = Orm.Id(c.AComment.Id).Update(&c.AComment)
+		_, err = c.Orm.Id(c.AComment.Id).Update(&c.AComment)
 	}
 	if err == nil {
 		c.ServeJson(map[string]interface{}{"error": ""})
@@ -370,7 +361,7 @@ func (c *ExerciseAction) AddAComment() {
 func (c *ExerciseAction) DelAComment() {
 	if c.Id > 0 {
 		a := &AnswerComment{Creator: User{Id: c.GetLoginUserId()}}
-		_, err := Orm.Id(c.Id).Delete(a)
+		_, err := c.Orm.Id(c.Id).Delete(a)
 		if err == nil {
 			c.ServeJson(map[string]interface{}{"error": ""})
 		} else {

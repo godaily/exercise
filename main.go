@@ -8,7 +8,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
 	"github.com/lunny/xweb"
-	//"xorm"
 )
 
 const APP_VER = "0.0.2 Beta"
@@ -25,7 +24,8 @@ func main() {
 	cfgs := xweb.SimpleParse(string(data))
 
 	// create Orm
-	actions.Orm, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
+	var orm *xorm.Engine
+	orm, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		cfgs["dbuser"], cfgs["dbpasswd"], cfgs["dbhost"], cfgs["dbname"]))
 	if err != nil {
 		fmt.Println(err)
@@ -35,27 +35,26 @@ func main() {
 	//actions.Orm.ShowDebug = true
 
 	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
-	actions.Orm.SetDefaultCacher(cacher)
+	orm.SetDefaultCacher(cacher)
+
+	app := xweb.MainServer().RootApp
+	app.SetConfig("Orm", orm)
 
 	// add actions
 	xweb.AddAction(&actions.HomeAction{})
-	xweb.AddRouter("/exercise", &actions.ExerciseAction{})
-	xweb.AddRouter("/question", &actions.QuestionAction{})
+	xweb.AutoAction(&actions.ExerciseAction{}, &actions.QuestionAction{})
 	xweb.AddAction(&actions.UserAction{})
 
 	// add login filter
-	app := xweb.MainServer().RootApp
 	loginFilter := xweb.NewLoginFilter(app, actions.USER_ID_TAG, "/login")
 	loginFilter.AddAnonymousUrls("/", "/exercise/", "/exercise/compile",
 		"/login", "/about", "/register")
 	app.AddFilter(loginFilter)
 
-	// add func app scope
-	app.AddFunc("AppVer", func() string {
+	// add func or var app scope
+	app.AddTmplVar("AppVer", func() string {
 		return "v" + APP_VER
 	})
-
-	app.SetConfig("Orm", actions.Orm)
 
 	// run the web server
 	xweb.Run(fmt.Sprintf("%v:%v", cfgs["address"], cfgs["port"]))

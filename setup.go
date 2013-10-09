@@ -30,7 +30,7 @@ func main() {
 	}
 	engine.ShowSQL = true
 
-	err = engine.CreateTables(&User{}, &Question{},
+	err = engine.Sync(&User{}, &Question{},
 		&QuestionFollow{}, &UserFollow{}, &Answer{}, &AnswerUp{},
 		&QuestionComment{}, &AnswerComment{}, &Tag{}, &QuestionTag{},
 		&Message{}, &Topic{}, &QuestionTopic{}, &TopicFollow{})

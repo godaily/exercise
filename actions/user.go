@@ -32,8 +32,7 @@ func (c *UserAction) ChangePass() error {
 		user := &User{Password: c.Password}
 		err := user.EncodePasswd()
 		if err == nil {
-			_, err = c.Orm().Id(c.GetLoginUserId()).Update(user)
-			//_, err = Orm.Id(c.GetLoginUserId()).Update(user)
+			_, err = c.Orm.Id(c.GetLoginUserId()).Update(user)
 			if err == nil {
 				return c.Render("user/passok.html")
 			}
@@ -45,7 +44,7 @@ func (c *UserAction) ChangePass() error {
 
 func (c *UserAction) Root(name string) error {
 	user := &User{LoginName: name}
-	has, err := Orm.Get(user)
+	has, err := c.Orm.Get(user)
 	if err != nil {
 		return err
 	}

@@ -5,24 +5,18 @@ import (
 	"github.com/lunny/xweb"
 )
 
-var (
-	Orm    *xorm.Engine
-	AppVer string
-)
-
 type BaseAction struct {
 	xweb.Action
+	Orm *xorm.Engine
 }
 
 func (c *BaseAction) Init() {
-	c.AddFunc("IsLogedIn", c.IsLogedIn)
-	c.AddFunc("GetLoginUserAvatar", c.GetLoginUserAvatar)
-	c.AddFunc("GetLoginUserName", c.GetLoginUserName)
-	c.AddFunc("GetLoginUserId", c.GetLoginUserId)
-}
-
-func (c *BaseAction) Orm() *xorm.Engine {
-	return c.App.GetConfig("Orm").(*xorm.Engine)
+	c.AddTmplVars(&xweb.T{"IsLogedIn": c.IsLogedIn,
+		"GetLoginUserAvatar": c.GetLoginUserAvatar,
+		"GetLoginUserName":   c.GetLoginUserName,
+		"GetLoginUserId":     c.GetLoginUserId,
+	})
+	c.Orm = c.App.GetConfig("Orm").(*xorm.Engine)
 }
 
 func (c *BaseAction) IsLogedIn() bool {

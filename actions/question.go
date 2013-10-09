@@ -24,7 +24,7 @@ func (c *QuestionAction) Init() {
 
 func (c *QuestionAction) Root() error {
 	questions := make([]Question, 0)
-	err := Orm.Find(&questions)
+	err := c.Orm.Find(&questions)
 	if err == nil {
 		return c.Render("question/root.html", &xweb.T{
 			"questions": &questions,
@@ -35,12 +35,12 @@ func (c *QuestionAction) Root() error {
 
 func (c *QuestionAction) Question() error {
 	answers := make([]Answer, 0)
-	_, err := Orm.Id(c.QuestionId).Get(&c.TheQuestion)
+	_, err := c.Orm.Id(c.QuestionId).Get(&c.TheQuestion)
 	if err != nil {
 		return err
 	}
 
-	err = Orm.Find(&answers, &Answer{QuestionId: c.QuestionId})
+	err = c.Orm.Find(&answers, &Answer{QuestionId: c.QuestionId})
 	if err == nil {
 		return c.Render("question/question.html", &xweb.T{
 			"answers": &answers,
@@ -54,7 +54,7 @@ func (c *QuestionAction) Ask() error {
 		return c.Render("question/ask.html")
 	} else if c.Method() == "POST" {
 		c.TheQuestion.LastUpdated = time.Now()
-		_, err := Orm.Insert(&c.TheQuestion)
+		_, err := c.Orm.Insert(&c.TheQuestion)
 		if err == nil {
 			return c.Render("question/askok.html")
 		}
@@ -67,7 +67,7 @@ func (c *QuestionAction) Answer() error {
 	if c.Method() == "GET" {
 		return c.Render("question/answer.html")
 	} else if c.Method() == "POST" {
-		_, err := Orm.Insert(&c.TheAnswer)
+		_, err := c.Orm.Insert(&c.TheAnswer)
 		if err == nil {
 			return c.Render("question/answerok.html")
 		}
