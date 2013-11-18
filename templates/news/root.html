@@ -1,0 +1,17 @@
+{{include "head.html"}}
+{{$basePath := .App.BasePath}}
+{{$t := .T}}
+{{$userId := GetLoginUserId}}
+<div class="container frame">
+<div class="row">
+	<div class="span9">
+		<ul>
+		{{range $idx, $new := $t.news}}
+		<li><div>{{Add $idx 1}}. <a href="{{$new.Link}}" target=_blank>{{$new.Title}}({{$new.Domain}})</a></div>
+			<div>{{$new.Created}} {{$new.Creator.Name}}| {{$new.NumComment}} 评论</div></li>
+		{{end}}
+	</ul>
+	</div>
+</div>
+</div>
+{{include "footer.html"}}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	. "code.google.com/p/go.crypto/scrypt"
+	"net/url"
 )
 
 const (
@@ -150,4 +151,31 @@ type QuestionTopic struct {
 type TopicFollow struct {
 	TopicId    int64 `xorm:"unique(tf)"`
 	FollowerId int64 `xorm:"unique(tf)"`
+}
+
+type News struct {
+	Id         int64
+	Title      string    `xorm:"notnull"`
+	Link       string    `xorm:"varchar(2048) notnull"`
+	Creator    User      `xorm:"index creator_id"`
+	Created    time.Time `xorm:"created"`
+	Updated    time.Time `xorm:"updated"`
+	NumComment int
+}
+
+func (this *News) Domain() string {
+	u, err := url.Parse(this.Link)
+	if err != nil {
+		return ""
+	}
+	return u.Host
+}
+
+type NewsComment struct {
+	Id      int64
+	NewsId  int64     `xorm:"index"`
+	Content string    `xorm:"text"`
+	Creator User      `xorm:"index creator_id"`
+	Created time.Time `xorm:"created"`
+	Updated time.Time `xorm:"updated"`
 }

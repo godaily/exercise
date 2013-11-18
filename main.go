@@ -8,11 +8,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
 	"github.com/lunny/xweb"
+	//"runtime"
 )
 
 const APP_VER = "0.0.2 Beta"
 
 func main() {
+	//runtime.GOMAXPROCS(2)
+
 	// load config
 	var err error
 	data, err := ioutil.ReadFile("config.ini")
@@ -31,11 +34,14 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	//actions.Orm.ShowSQL = true
-	//actions.Orm.ShowDebug = true
+	orm.ShowSQL = (cfgs["showSQL"] == "1")
+	orm.ShowDebug = (cfgs["showDebug"] == "1")
 
-	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
-	orm.SetDefaultCacher(cacher)
+	if cfgs["useCache"] == "1" {
+		//cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
+		cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
+		orm.SetDefaultCacher(cacher)
+	}
 
 	app := xweb.MainServer().RootApp
 	app.SetConfig("Orm", orm)
