@@ -2,5 +2,6 @@
 output
 setup
 main_linux_x32
-vendor
+.vendor
 main
+godaily

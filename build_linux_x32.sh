@@ -1,10 +1,8 @@
-CGO_ENABLED=0 GOOS=linux GOARCH=386 go build main.go
-CGO_ENABLED=0 GOOS=linux GOARCH=386 go build setup.go
+CGO_ENABLED=0 GOOS=linux GOARCH=386 gopm build
 rm -rf output
 mkdir output
-chmod +x main
-mv main output/godaily
-mv setup output/
+chmod +x godaily
+mv godaily output/
 cp config.ini output/
 cp createdb.sql output/
 cp -r static output/

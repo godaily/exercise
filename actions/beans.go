@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"net/url"
 
 	. "code.google.com/p/go.crypto/scrypt"
-	"net/url"
 )
 
 const (

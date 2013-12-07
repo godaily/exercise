@@ -3,9 +3,10 @@ package actions
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	. "github.com/lunny/play-sdk"
 	"github.com/lunny/xweb"
-	"time"
 )
 
 type ExerciseAction struct {

@@ -1,14 +1,16 @@
 package main
 
 import (
-	"./actions"
 	"fmt"
 	"io/ioutil"
+	//"runtime"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
 	"github.com/lunny/xweb"
-	//"runtime"
+
+	. "github.com/govc/godaily/actions"
+	
 )
 
 const APP_VER = "0.0.2 Beta"
@@ -37,8 +39,18 @@ func main() {
 	orm.ShowSQL = (cfgs["showSQL"] == "1")
 	orm.ShowDebug = (cfgs["showDebug"] == "1")
 
+	err = orm.Sync(&User{}, &Question{},
+		&QuestionFollow{}, &UserFollow{}, &Answer{}, &AnswerUp{},
+		&QuestionComment{}, &AnswerComment{}, &Tag{}, &QuestionTag{},
+		&Message{}, &Topic{}, &QuestionTopic{}, &TopicFollow{})
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	if cfgs["useCache"] == "1" {
-		//cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
+		fmt.Println("useing orm cache system ...")
 		cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
 		orm.SetDefaultCacher(cacher)
 	}
@@ -47,12 +59,12 @@ func main() {
 	app.SetConfig("Orm", orm)
 
 	// add actions
-	xweb.AddAction(&actions.HomeAction{})
-	xweb.AutoAction(&actions.ExerciseAction{}, &actions.QuestionAction{})
-	xweb.AddAction(&actions.UserAction{})
+	xweb.AddAction(&HomeAction{})
+	xweb.AutoAction(&ExerciseAction{}, &QuestionAction{})
+	xweb.AddAction(&UserAction{})
 
 	// add login filter
-	loginFilter := xweb.NewLoginFilter(app, actions.USER_ID_TAG, "/login")
+	loginFilter := xweb.NewLoginFilter(app, USER_ID_TAG, "/login")
 	loginFilter.AddAnonymousUrls("/", "/exercise/", "/exercise/compile",
 		"/login", "/about", "/register")
 	app.AddFilter(loginFilter)
