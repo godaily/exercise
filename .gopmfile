@@ -1,2 +1,5 @@
 [target]
 path=github.com/govc/godaily
+
+[deps]
+github.com/lunny/xorm=
