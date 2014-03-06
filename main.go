@@ -41,7 +41,7 @@ func main() {
 	err = orm.Sync(&User{}, &Question{},
 		&QuestionFollow{}, &UserFollow{}, &Answer{}, &AnswerUp{},
 		&QuestionComment{}, &AnswerComment{}, &Tag{}, &QuestionTag{},
-		&Message{}, &Topic{}, &QuestionTopic{}, &TopicFollow{})
+		&Message{}, &Topic{}, &QuestionTopic{}, &TopicFollow{}, &News{})
 
 	if err != nil {
 		fmt.Println(err)
@@ -54,18 +54,18 @@ func main() {
 		orm.SetDefaultCacher(cacher)
 	}
 
-	app := xweb.MainServer().RootApp
+	app := xweb.RootApp()
 	app.SetConfig("Orm", orm)
 
 	// add actions
 	xweb.AddAction(&HomeAction{})
-	xweb.AutoAction(&ExerciseAction{}, &QuestionAction{})
+	xweb.AutoAction(&ExerciseAction{}, &QuestionAction{}, &NewsAction{})
 	xweb.AddAction(&UserAction{})
 
 	// add login filter
 	loginFilter := xweb.NewLoginFilter(app, USER_ID_TAG, "/login")
-	loginFilter.AddAnonymousUrls("/", "/exercise/", "/exercise/compile",
-		"/login", "/about", "/register")
+	loginFilter.AddAnonymousUrls("/", "/exercise", "/exercise/compile",
+		"/news", "/login", "/about", "/register")
 	app.AddFilter(loginFilter)
 
 	// add func or var app scope

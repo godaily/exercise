@@ -6,7 +6,7 @@
 				<sub class="version">{{AppVer}}</sub>
 			</a>
 			<ul class="nav">
-				<!--<li {{if .T.IsHome}}class="active"{{end}}><a href="/">广场</a></li>-->
+				<li {{if .T.IsNews}}class="active"{{end}}><a href="/news">新闻</a></li>
 				<li {{if .T.IsExer}}class="active"{{end}}><a href="/exercise/">每日一练</a></li>
 				<li {{if .T.IsAbout}}class="active"{{end}}><a href="/about">关于</a></li>
 			</ul>
