@@ -48,14 +48,15 @@ func main() {
 		return
 	}
 
+	server := xweb.MainServer()
+	app := xweb.RootApp()
+	app.SetConfig("Orm", orm)
+
 	if useCache, _ := cfg.GetBool("useCache"); useCache {
-		fmt.Println("using orm cache system ...")
+		server.Info("using orm cache system ...")
 		cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 1000)
 		orm.SetDefaultCacher(cacher)
 	}
-
-	app := xweb.RootApp()
-	app.SetConfig("Orm", orm)
 
 	// add actions
 	xweb.AddAction(&HomeAction{})

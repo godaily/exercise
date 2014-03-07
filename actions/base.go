@@ -6,7 +6,7 @@ import (
 )
 
 type BaseAction struct {
-	xweb.Action
+	*xweb.Action
 	Orm *xorm.Engine
 }
 

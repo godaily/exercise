@@ -47,7 +47,6 @@ func (u *User) BuildAvatar() {
 	m := md5.New()
 	m.Write([]byte(strings.ToLower(strings.Trim(u.Email, " "))))
 	dg := fmt.Sprintf("%x", m.Sum(nil))
-	fmt.Println(dg)
 	u.Avatar = fmt.Sprintf("http://www.gravatar.com/avatar/%v", dg)
 }
 
